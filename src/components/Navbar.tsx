@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Droplets, Globe, User, LogOut, Shield } from 'lucide-react';
-import { useStore } from '../store/store';
+import { useStore } from '../store/supabaseStore';
 import { useTranslation } from '../hooks/useTranslation';
 
 export function Navbar() {

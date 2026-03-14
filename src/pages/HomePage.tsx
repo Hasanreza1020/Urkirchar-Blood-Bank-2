@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, UserPlus, Users, Heart, Droplets, ArrowRight, UserCheck, ClipboardCheck, HeartHandshake, Shield, Star, CheckCircle, MapPin, Calendar } from 'lucide-react';
+import { Search, UserPlus, Users, Heart, Droplets, ArrowRight, UserCheck, ClipboardCheck, HeartHandshake, Shield, Star, CircleCheck as CheckCircle, MapPin, Calendar } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation';
-import { useStore, LOCATIONS } from '../store/store';
+import { useStore, LOCATIONS } from '../store/supabaseStore';
 
 function AnimatedCounter({ end, duration = 2000 }: { end: number; duration?: number }) {
   const [count, setCount] = useState(0);

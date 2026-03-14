@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { Navbar } from './components/Navbar';
@@ -10,8 +11,15 @@ import { ProfilePage } from './pages/ProfilePage';
 import { AdminPage } from './pages/AdminPage';
 import { WhatsAppButton } from './components/WhatsAppButton';
 import { ScrollToTop } from './components/ScrollToTop';
+import { useStore } from './store/supabaseStore';
 
 export function App() {
+  const loadDonors = useStore(state => state.loadDonors);
+
+  useEffect(() => {
+    loadDonors();
+  }, [loadDonors]);
+
   return (
     <HashRouter>
       <ScrollToTop />

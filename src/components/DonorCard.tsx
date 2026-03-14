@@ -1,7 +1,7 @@
-import { CheckCircle, MapPin, Calendar, Phone, MessageCircle } from 'lucide-react';
+import { CircleCheck as CheckCircle, MapPin, Calendar, Phone, MessageCircle } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation';
-import { LOCATIONS } from '../store/store';
-import type { Donor } from '../store/store';
+import { LOCATIONS } from '../store/supabaseStore';
+import type { Donor } from '../store/supabaseStore';
 
 interface DonorCardProps {
   donor: Donor;

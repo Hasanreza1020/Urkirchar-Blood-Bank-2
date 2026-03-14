@@ -2,16 +2,17 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LogIn, Droplets } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation';
-import { useStore } from '../store/store';
+import { useStore } from '../store/supabaseStore';
 import toast from 'react-hot-toast';
 
 export function LoginPage() {
   const { t } = useTranslation();
-  const { login, currentUser } = useStore();
+  const { login, currentUser, loadDonors } = useStore();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   if (currentUser) {
     return (
@@ -26,13 +27,28 @@ export function LoginPage() {
     );
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     if (!email || !password) { setError('Please fill in all fields'); return; }
-    const success = login(email, password);
-    if (success) { toast.success(t.login.success); navigate('/profile'); }
-    else { setError(t.login.error); toast.error(t.login.error); }
+
+    setLoading(true);
+    try {
+      const success = await login(email, password);
+      if (success) {
+        await loadDonors();
+        toast.success(t.login.success);
+        navigate('/profile');
+      } else {
+        setError(t.login.error);
+        toast.error(t.login.error);
+      }
+    } catch (err) {
+      setError(t.login.error);
+      toast.error(t.login.error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -77,9 +93,9 @@ export function LoginPage() {
             </div>
           </div>
 
-          <button type="submit" className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-blood-600 to-blood-500 text-white font-bold rounded-xl hover:from-blood-700 hover:to-blood-600 transition-all shadow-lg shadow-red-200/50 hover:shadow-xl">
+          <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-blood-600 to-blood-500 text-white font-bold rounded-xl hover:from-blood-700 hover:to-blood-600 transition-all shadow-lg shadow-red-200/50 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed">
             <LogIn className="w-5 h-5" />
-            {t.login.submit}
+            {loading ? 'Logging in...' : t.login.submit}
           </button>
 
           <p className="text-center text-sm text-gray-500 pt-2">

@@ -1,68 +1,136 @@
 /// <reference types="vite/client" />
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = (import.meta as any).env?.VITE_SUPABASE_URL as string | undefined;
-const supabaseAnonKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY as string | undefined;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
-const hasSupabaseEnv = Boolean(supabaseUrl && supabaseAnonKey);
-
-if (!hasSupabaseEnv) {
-  console.warn('Supabase environment variables are missing. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY. Falling back to local data.');
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing Supabase environment variables');
 }
 
-export const supabase = hasSupabaseEnv
-  ? createClient(supabaseUrl!, supabaseAnonKey!, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    })
-  : null;
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-export type DonorInsert = {
-  name: string;
-  phone: string;
-  blood_group: string;
-  location: string;
-  last_donation?: string | null;
-  created_at?: string;
-  is_approved?: boolean;
-};
-
-export async function insertDonor(data: DonorInsert) {
-  if (!supabase) throw new Error('Supabase is not configured.');
-
-  const payload = {
-    ...data,
-    created_at: data.created_at ?? new Date().toISOString(),
+export type Database = {
+  public: {
+    Tables: {
+      users: {
+        Row: {
+          id: string;
+          email: string;
+          name: string;
+          role: 'user' | 'admin';
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          email: string;
+          name: string;
+          role?: 'user' | 'admin';
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          email?: string;
+          name?: string;
+          role?: 'user' | 'admin';
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      donors: {
+        Row: {
+          id: string;
+          user_id: string | null;
+          name: string;
+          email: string;
+          phone: string;
+          blood_group: string;
+          location: string;
+          last_donation: string | null;
+          available: boolean;
+          verified: boolean;
+          image: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id?: string | null;
+          name: string;
+          email: string;
+          phone: string;
+          blood_group: string;
+          location: string;
+          last_donation?: string | null;
+          available?: boolean;
+          verified?: boolean;
+          image?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string | null;
+          name?: string;
+          email?: string;
+          phone?: string;
+          blood_group?: string;
+          location?: string;
+          last_donation?: string | null;
+          available?: boolean;
+          verified?: boolean;
+          image?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      donation_requests: {
+        Row: {
+          id: string;
+          requester_name: string;
+          requester_phone: string;
+          blood_group: string;
+          location: string;
+          urgency: 'low' | 'medium' | 'high' | 'critical';
+          units_needed: number;
+          notes: string;
+          status: 'pending' | 'fulfilled' | 'cancelled';
+          created_at: string;
+          fulfilled_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          requester_name: string;
+          requester_phone: string;
+          blood_group: string;
+          location: string;
+          urgency?: 'low' | 'medium' | 'high' | 'critical';
+          units_needed?: number;
+          notes?: string;
+          status?: 'pending' | 'fulfilled' | 'cancelled';
+          created_at?: string;
+          fulfilled_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          requester_name?: string;
+          requester_phone?: string;
+          blood_group?: string;
+          location?: string;
+          urgency?: 'low' | 'medium' | 'high' | 'critical';
+          units_needed?: number;
+          notes?: string;
+          status?: 'pending' | 'fulfilled' | 'cancelled';
+          created_at?: string;
+          fulfilled_at?: string | null;
+        };
+      };
+    };
   };
-
-  const { error, data: inserted } = await supabase
-    .from('donors')
-    .insert(payload)
-    .select('*')
-    .single();
-  if (error) throw error;
-  return inserted;
-}
-
-export type SupabaseDonor = {
-  id: string;
-  name: string;
-  phone: string;
-  blood_group: string;
-  location: string;
-  last_donation: string | null;
-  created_at: string;
-  is_approved?: boolean;
 };
 
-export async function fetchApprovedDonors() {
-  if (!supabase) throw new Error('Supabase is not configured.');
-
-  const { data, error } = await supabase
-    .from('donors')
-    .select('*')
-    .eq('is_approved', true)
-    .order('created_at', { ascending: false });
-
-  if (error) throw error;
-  return data as SupabaseDonor[];
-}
+export type User = Database['public']['Tables']['users']['Row'];
+export type Donor = Database['public']['Tables']['donors']['Row'];
+export type DonationRequest = Database['public']['Tables']['donation_requests']['Row'];

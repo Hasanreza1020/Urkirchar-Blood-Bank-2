@@ -1,14 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { User, Edit3, Save, X, MapPin, Phone, Mail, Calendar, Droplets, Shield, CheckCircle, Camera, Upload } from 'lucide-react';
+import { User, CreditCard as Edit3, Save, X, MapPin, Phone, Mail, Calendar, Droplets, Shield, CircleCheck as CheckCircle, Camera, Upload } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation';
-import { useStore, LOCATIONS } from '../store/store';
+import { useStore, LOCATIONS } from '../store/supabaseStore';
 import toast from 'react-hot-toast';
 
 export function ProfilePage() {
   const { t, language } = useTranslation();
   const { currentUser, donors, updateDonor, toggleAvailable } = useStore();
   const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const donor = donors.find(d => d.userId === currentUser?.id);
@@ -47,18 +48,29 @@ export function ProfilePage() {
     reader.readAsDataURL(file);
   };
 
-  const handleSave = () => {
-    if (donor) {
-      updateDonor(donor.id, { name: form.name, phone: form.phone, location: form.location, lastDonation: form.lastDonation, image: form.image });
+  const handleSave = async () => {
+    if (!donor) return;
+
+    setSaving(true);
+    try {
+      await updateDonor(donor.id, { name: form.name, phone: form.phone, location: form.location, lastDonation: form.lastDonation, image: form.image });
       toast.success(t.profile.updated);
+      setEditing(false);
+    } catch (error) {
+      toast.error('Failed to update profile');
+    } finally {
+      setSaving(false);
     }
-    setEditing(false);
   };
 
-  const handleToggleAvailable = () => {
-    if (donor) {
-      toggleAvailable(donor.id);
+  const handleToggleAvailable = async () => {
+    if (!donor) return;
+
+    try {
+      await toggleAvailable(donor.id);
       toast.success(donor.available ? 'Status: Unavailable' : 'Status: Available');
+    } catch (error) {
+      toast.error('Failed to update status');
     }
   };
 

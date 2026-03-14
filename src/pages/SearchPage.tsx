@@ -1,8 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, Filter, ChevronLeft, ChevronRight, X, Droplets } from 'lucide-react';
+import { Search, ListFilter as Filter, ChevronLeft, ChevronRight, X, Droplets } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation';
-import { useStore, LOCATIONS } from '../store/store';
+import { useStore, LOCATIONS } from '../store/supabaseStore';
 import { DonorCard } from '../components/DonorCard';
 
 const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];

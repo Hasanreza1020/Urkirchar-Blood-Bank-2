@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Shield, Users, CheckCircle, Clock, Heart, Trash2, ToggleLeft, ToggleRight, Search, ChevronLeft, ChevronRight, Copy, ClipboardCheck } from 'lucide-react';
+import { Shield, Users, CircleCheck as CheckCircle, Clock, Heart, Trash2, ToggleLeft, ToggleRight, Search, ChevronLeft, ChevronRight, Copy, ClipboardCheck } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation';
-import { useStore } from '../store/store';
+import { useStore } from '../store/supabaseStore';
 import toast from 'react-hot-toast';
 
 const PER_PAGE = 10;
@@ -13,6 +13,7 @@ export function AdminPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
   const [copiedAll, setCopiedAll] = useState(false);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   if (!currentUser || currentUser.role !== 'admin') {
     return (
@@ -42,10 +43,41 @@ export function AdminPage() {
   const totalPages = Math.ceil(filtered.length / PER_PAGE);
   const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
-  const handleDelete = (id: string, name: string) => {
-    if (confirm(`Delete donor "${name}"?`)) {
-      deleteDonor(id);
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`Delete donor "${name}"?`)) return;
+
+    setActionLoading(id);
+    try {
+      await deleteDonor(id);
       toast.success(`Deleted ${name}`);
+    } catch (error) {
+      toast.error('Failed to delete donor');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleToggleVerified = async (id: string, name: string) => {
+    setActionLoading(id);
+    try {
+      await toggleVerified(id);
+      toast.success(`Updated ${name}`);
+    } catch (error) {
+      toast.error('Failed to update');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleToggleAvailable = async (id: string, name: string) => {
+    setActionLoading(id);
+    try {
+      await toggleAvailable(id);
+      toast.success(`Updated ${name}`);
+    } catch (error) {
+      toast.error('Failed to update');
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -202,23 +234,26 @@ export function AdminPage() {
                           <Copy className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => { toggleVerified(donor.id); toast.success(`Toggled verified for ${donor.name}`); }}
+                          onClick={() => handleToggleVerified(donor.id, donor.name)}
+                          disabled={actionLoading === donor.id}
                           title={t.admin.toggleVerify}
-                          className="p-2 rounded-lg text-blue-500 hover:bg-blue-50 transition-colors"
+                          className="p-2 rounded-lg text-blue-500 hover:bg-blue-50 transition-colors disabled:opacity-50"
                         >
                           {donor.verified ? <ToggleRight className="w-5 h-5" /> : <ToggleLeft className="w-5 h-5" />}
                         </button>
                         <button
-                          onClick={() => { toggleAvailable(donor.id); toast.success(`Toggled availability for ${donor.name}`); }}
+                          onClick={() => handleToggleAvailable(donor.id, donor.name)}
+                          disabled={actionLoading === donor.id}
                           title={t.admin.toggleAvailable}
-                          className="p-2 rounded-lg text-green-500 hover:bg-green-50 transition-colors"
+                          className="p-2 rounded-lg text-green-500 hover:bg-green-50 transition-colors disabled:opacity-50"
                         >
                           <Heart className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(donor.id, donor.name)}
+                          disabled={actionLoading === donor.id}
                           title={t.admin.delete}
-                          className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
+                          className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
