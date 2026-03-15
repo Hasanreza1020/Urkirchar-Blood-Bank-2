@@ -1,91 +1,84 @@
 import { supabase } from '../lib/supabase';
-import type { User } from '../lib/supabase';
-
-export async function loginUser(email: string, password: string): Promise<User | null> {
-  try {
-    const { data: user, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('email', email)
-      .maybeSingle();
-
-    if (error) throw error;
-
-    if (!user) return null;
-
-    return user;
-  } catch (error) {
-    console.error('Login error:', error);
-    return null;
-  }
-}
 
 export async function registerUser(userData: {
   name: string;
   email: string;
   password: string;
-}): Promise<User | null> {
+}): Promise<{ id: string; email: string; name: string } | null> {
   try {
-    const { data: existingUser } = await supabase
-      .from('users')
-      .select('id')
-      .eq('email', userData.email)
-      .maybeSingle();
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: userData.email,
+      password: userData.password,
+      options: {
+        data: {
+          full_name: userData.name,
+        },
+      },
+    });
 
-    if (existingUser) {
-      throw new Error('User already exists');
+    if (authError) throw authError;
+
+    if (!authData.user?.id) {
+      throw new Error('Auth user creation failed - no user ID returned');
     }
 
-    const { data: newUser, error } = await supabase
-      .from('users')
-      .insert({
-        email: userData.email,
-        name: userData.name,
-        role: 'user',
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    return newUser;
-  } catch (error) {
+    return {
+      id: authData.user.id,
+      email: authData.user.email || userData.email,
+      name: userData.name,
+    };
+  } catch (error: any) {
     console.error('Registration error:', error);
+    if (error.message?.includes('already registered')) {
+      throw new Error('Email already registered');
+    }
     throw error;
   }
 }
 
-export async function getUserById(userId: string): Promise<User | null> {
+export async function loginUser(
+  email: string,
+  password: string
+): Promise<{ id: string; email: string; name: string } | null> {
   try {
-    const { data: user, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle();
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-    if (error) throw error;
+    if (authError) throw authError;
 
-    return user;
-  } catch (error) {
-    console.error('Get user error:', error);
-    return null;
+    if (!authData.user) return null;
+
+    return {
+      id: authData.user.id,
+      email: authData.user.email || email,
+      name: authData.user.user_metadata?.full_name || email,
+    };
+  } catch (error: any) {
+    console.error('Login error:', error);
+    throw error;
   }
 }
 
-export async function updateUser(userId: string, updates: Partial<User>): Promise<User | null> {
+export async function logoutUser(): Promise<void> {
   try {
-    const { data: updatedUser, error } = await supabase
-      .from('users')
-      .update(updates)
-      .eq('id', userId)
-      .select()
-      .single();
-
+    const { error } = await supabase.auth.signOut();
     if (error) throw error;
-
-    return updatedUser;
   } catch (error) {
-    console.error('Update user error:', error);
+    console.error('Logout error:', error);
+    throw error;
+  }
+}
+
+export async function getCurrentUser(): Promise<{ id: string; email: string } | null> {
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    return user ? { id: user.id, email: user.email || '' } : null;
+  } catch (error) {
+    console.error('Get current user error:', error);
     return null;
   }
 }

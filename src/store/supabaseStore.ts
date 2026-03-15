@@ -124,7 +124,15 @@ export const useStore = create<StoreState>()(
         try {
           const user = await loginUser(email, password);
           if (user) {
-            set({ currentUser: transformSupabaseUser(user) });
+            set({
+              currentUser: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: 'user',
+                createdAt: new Date().toISOString().split('T')[0],
+              },
+            });
             return true;
           }
           return false;
@@ -155,7 +163,13 @@ export const useStore = create<StoreState>()(
 
           if (!donor) throw new Error('Donor creation failed');
 
-          const transformedUser = transformSupabaseUser(user);
+          const transformedUser: User = {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: 'user',
+            createdAt: new Date().toISOString().split('T')[0],
+          };
           set({ currentUser: transformedUser });
 
           await get().loadDonors();

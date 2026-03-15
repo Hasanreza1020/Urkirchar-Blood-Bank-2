@@ -80,18 +80,40 @@ export async function createDonor(donorData: {
   image?: string;
 }): Promise<Donor | null> {
   try {
+    if (donorData.user_id) {
+      const existing = await getDonorByUserId(donorData.user_id);
+      if (existing) {
+        console.log(`Donor already exists for user ${donorData.user_id}`);
+        return existing;
+      }
+    }
+
     const { data, error } = await supabase
       .from('donors')
       .insert({
-        ...donorData,
-        verified: false,
+        user_id: donorData.user_id || null,
+        name: donorData.name,
+        email: donorData.email,
+        phone: donorData.phone,
+        blood_group: donorData.blood_group,
+        location: donorData.location,
+        last_donation: donorData.last_donation || null,
         available: donorData.available ?? true,
         image: donorData.image || '',
+        verified: false,
       })
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      if (error.message.includes('duplicate') || error.message.includes('unique')) {
+        console.log('Donor already exists (duplicate constraint)');
+        if (donorData.user_id) {
+          return getDonorByUserId(donorData.user_id);
+        }
+      }
+      throw error;
+    }
 
     return data;
   } catch (error) {
@@ -105,9 +127,19 @@ export async function updateDonor(
   updates: Partial<Donor>
 ): Promise<Donor | null> {
   try {
+    const updateData: any = {};
+    if (updates.name) updateData.name = updates.name;
+    if (updates.phone) updateData.phone = updates.phone;
+    if (updates.email) updateData.email = updates.email;
+    if (updates.location) updateData.location = updates.location;
+    if (updates.last_donation) updateData.last_donation = updates.last_donation;
+    if (updates.image !== undefined) updateData.image = updates.image;
+    if (updates.available !== undefined) updateData.available = updates.available;
+    if (updates.verified !== undefined) updateData.verified = updates.verified;
+
     const { data, error } = await supabase
       .from('donors')
-      .update(updates)
+      .update(updateData)
       .eq('id', donorId)
       .select()
       .single();
