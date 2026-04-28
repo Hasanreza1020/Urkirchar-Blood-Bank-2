@@ -1,9 +1,12 @@
-import { useEffect, useState, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Search, UserPlus, Users, Heart, Droplets, ArrowRight, UserCheck, ClipboardCheck, HeartHandshake, Shield, Star, CircleCheck as CheckCircle, MapPin, Calendar, Phone, MessageCircle, Copy, Building2, AlertCircle } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { useEffect, useState, useRef, useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import { Search, UserPlus, Users, Heart, Droplets, ArrowRight, ListFilter as Filter, ChevronLeft, ChevronRight, X, AlertCircle, MapPin, HeartHandshake, Star } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation';
 import { useStore, LOCATIONS } from '../store/supabaseStore';
+import { DonorCard } from '../components/DonorCard';
+
+const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+const PER_PAGE = 9;
 
 function AnimatedCounter({ end, duration = 2000 }: { end: number; duration?: number }) {
   const [count, setCount] = useState(0);
@@ -46,41 +49,38 @@ function BloodDropIcon({ className }: { className?: string }) {
 export function HomePage() {
   const { t, language } = useTranslation();
   const donors = useStore(state => state.donors);
-  const navigate = useNavigate();
 
-  const [quickBloodGroup, setQuickBloodGroup] = useState('');
-  const [quickLocation, setQuickLocation] = useState('');
+  const [bloodGroup, setBloodGroup] = useState('');
+  const [location, setLocation] = useState('');
+  const [availableOnly, setAvailableOnly] = useState(false);
+  const [page, setPage] = useState(1);
 
   const totalDonors = donors.length;
   const availableDonors = donors.filter(d => d.available).length;
   const bloodGroups = [...new Set(donors.map(d => d.bloodGroup))].length;
 
-  const recentWarriors = [...donors]
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 8);
+  const filtered = useMemo(() => {
+    return donors.filter(d => {
+      if (bloodGroup && d.bloodGroup !== bloodGroup) return false;
+      if (location && d.location !== location) return false;
+      if (availableOnly && !d.available) return false;
+      return true;
+    });
+  }, [donors, bloodGroup, location, availableOnly]);
 
-  const handleQuickSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const params = new URLSearchParams();
-    if (quickBloodGroup) params.set('bloodGroup', quickBloodGroup);
-    if (quickLocation) params.set('location', quickLocation);
-    navigate(`/search?${params.toString()}`);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
+  const safePage = Math.min(page, totalPages);
+  const paginated = filtered.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE);
+
+  const handleReset = () => {
+    setBloodGroup('');
+    setLocation('');
+    setAvailableOnly(false);
+    setPage(1);
   };
 
-  const copyPhone = (phone: string) => {
-    navigator.clipboard.writeText(phone);
-    toast.success(language === 'bn' ? 'ফোন নম্বর কপি করা হয়েছে' : 'Phone number copied');
-  };
-
-  const getInitials = (name: string) =>
-    name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-
-  const bgColors = ['bg-blue-500', 'bg-emerald-500', 'bg-purple-500', 'bg-amber-500', 'bg-teal-500', 'bg-pink-500', 'bg-indigo-500', 'bg-rose-500'];
-
-  const getLocationDisplay = (loc: string) => {
-    const found = LOCATIONS.find(l => l.en === loc);
-    if (found) return language === 'bn' ? found.bn : found.en;
-    return loc;
+  const scrollToDonors = () => {
+    document.getElementById('find-donors')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   return (
@@ -89,7 +89,6 @@ export function HomePage() {
       <section className="relative overflow-hidden bg-gradient-to-b from-red-50/60 via-white to-white">
         <div className="absolute top-20 left-10 w-80 h-80 bg-red-100/40 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob" />
         <div className="absolute top-40 right-10 w-80 h-80 bg-pink-100/40 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob" style={{ animationDelay: '2s' }} />
-        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-rose-100/30 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" style={{ animationDelay: '4s' }} />
 
         <div className="absolute top-32 right-[15%] opacity-10 animate-float" style={{ animationDelay: '0s' }}>
           <BloodDropIcon className="w-8 h-8 text-blood-600" />
@@ -97,15 +96,12 @@ export function HomePage() {
         <div className="absolute top-48 left-[10%] opacity-10 animate-float" style={{ animationDelay: '1s' }}>
           <BloodDropIcon className="w-6 h-6 text-blood-500" />
         </div>
-        <div className="absolute bottom-40 right-[20%] opacity-10 animate-float" style={{ animationDelay: '2s' }}>
-          <BloodDropIcon className="w-10 h-10 text-blood-400" />
-        </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-20 sm:pt-24 sm:pb-32">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-16 sm:pt-20 sm:pb-20">
           <div className="text-center max-w-4xl mx-auto">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white text-blood-600 rounded-full text-sm font-medium mb-8 border border-red-100 shadow-sm animate-fade-in">
               <div className="w-2 h-2 rounded-full bg-blood-500 animate-pulse" />
-              <span>🩸 {language === 'bn' ? 'উরকিরচর ব্লাড ব্যাংক — একসাথে জীবন বাঁচাই' : 'Urkirchar Blood Bank — Saving Lives Together'}</span>
+              <span>{language === 'bn' ? 'উরকিরচর ব্লাড ব্যাংক — একসাথে জীবন বাঁচাই' : 'Urkirchar Blood Bank — Saving Lives Together'}</span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black text-gray-900 leading-[1.1] mb-6 tracking-tight animate-slide-up">
@@ -120,19 +116,19 @@ export function HomePage() {
               </span>
             </h1>
 
-            <p className="text-lg sm:text-xl text-gray-500 mb-10 max-w-2xl mx-auto leading-relaxed animate-slide-up" style={{ animationDelay: '0.1s' }}>
+            <p className="text-lg sm:text-xl text-gray-500 mb-8 max-w-2xl mx-auto leading-relaxed animate-slide-up" style={{ animationDelay: '0.1s' }}>
               {t.hero.subtext}
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-              <Link
-                to="/search"
+              <button
+                onClick={scrollToDonors}
                 className="w-full sm:w-auto group inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-gradient-to-r from-blood-600 to-blood-500 text-white font-semibold rounded-2xl hover:from-blood-700 hover:to-blood-600 transition-all shadow-xl shadow-red-200/50 hover:shadow-2xl hover:-translate-y-0.5"
               >
                 <Search className="w-5 h-5" />
                 {t.hero.findDonor}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
+              </button>
               <Link
                 to="/register"
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-white text-blood-600 font-semibold rounded-2xl border-2 border-red-100 hover:border-red-300 hover:bg-red-50 transition-all hover:-translate-y-0.5"
@@ -141,54 +137,10 @@ export function HomePage() {
                 {t.hero.becomeDonor}
               </Link>
             </div>
-
-            {/* Quick Search Bar (bupblood-inspired) */}
-            <form
-              onSubmit={handleQuickSearch}
-              className="mt-10 bg-white rounded-2xl shadow-xl shadow-red-100/50 border border-red-100 p-3 sm:p-4 max-w-3xl mx-auto animate-slide-up"
-              style={{ animationDelay: '0.3s' }}
-            >
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-                <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-red-50/40 rounded-xl border border-red-100/60">
-                  <Droplets className="w-4 h-4 text-blood-500 shrink-0" />
-                  <select
-                    value={quickBloodGroup}
-                    onChange={e => setQuickBloodGroup(e.target.value)}
-                    className="w-full bg-transparent text-sm text-gray-900 focus:outline-none cursor-pointer"
-                  >
-                    <option value="">{language === 'bn' ? 'রক্তের গ্রুপ' : 'Blood group'}</option>
-                    {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(g => (
-                      <option key={g} value={g}>{g}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-red-50/40 rounded-xl border border-red-100/60">
-                  <MapPin className="w-4 h-4 text-blood-500 shrink-0" />
-                  <select
-                    value={quickLocation}
-                    onChange={e => setQuickLocation(e.target.value)}
-                    className="w-full bg-transparent text-sm text-gray-900 focus:outline-none cursor-pointer"
-                  >
-                    <option value="">{language === 'bn' ? 'এলাকা (যেকোনো)' : 'Area (any)'}</option>
-                    {LOCATIONS.map(loc => (
-                      <option key={loc.en} value={loc.en}>
-                        {language === 'bn' ? loc.bn : loc.en}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <button
-                  type="submit"
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blood-600 to-blood-500 text-white font-semibold rounded-xl hover:from-blood-700 hover:to-blood-600 transition-all shadow-md"
-                >
-                  <Search className="w-4 h-4" />
-                  {language === 'bn' ? 'খুঁজুন' : 'Search'}
-                </button>
-              </div>
-            </form>
           </div>
 
-          <div className="mt-16 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-4xl mx-auto">
+          {/* Stats */}
+          <div className="mt-14 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-4xl mx-auto">
             {[
               { label: t.stats.totalDonors, value: totalDonors, icon: Users, iconColor: '#dc2626', bg: 'bg-red-50' },
               { label: t.stats.availableDonors, value: availableDonors, icon: Heart, iconColor: '#22c55e', bg: 'bg-green-50' },
@@ -229,42 +181,7 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="py-20 sm:py-28 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-50 text-blood-600 rounded-full text-xs font-semibold mb-4 uppercase tracking-wider">
-              <Star className="w-3 h-3" /> {language === 'bn' ? 'প্রক্রিয়া' : 'Process'}
-            </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 mb-4">{t.howItWorks.title}</h2>
-            <p className="text-gray-500 text-lg max-w-2xl mx-auto">{t.howItWorks.subtitle}</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {[
-              { icon: UserCheck, title: t.howItWorks.step1Title, desc: t.howItWorks.step1Desc, step: '01', gradient: 'from-blood-500 to-rose-500' },
-              { icon: ClipboardCheck, title: t.howItWorks.step2Title, desc: t.howItWorks.step2Desc, step: '02', gradient: 'from-blue-500 to-indigo-500' },
-              { icon: HeartHandshake, title: t.howItWorks.step3Title, desc: t.howItWorks.step3Desc, step: '03', gradient: 'from-green-500 to-emerald-500' },
-            ].map((item, i) => (
-              <div key={i} className="relative text-center group">
-                {i < 2 && (
-                  <div className="hidden md:block absolute top-12 left-[60%] w-[80%] h-[2px] bg-gradient-to-r from-gray-200 to-transparent" />
-                )}
-                <div className={`relative w-20 h-20 bg-gradient-to-br ${item.gradient} rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                  <item.icon className="w-9 h-9 text-white" />
-                  <div className="absolute -top-2 -right-2 w-7 h-7 bg-white rounded-full flex items-center justify-center border-2 border-gray-100 shadow-sm">
-                    <span className="text-xs font-black text-gray-900">{item.step}</span>
-                  </div>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">{item.title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed max-w-xs mx-auto">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Urgent Request Banner (bupblood-inspired) */}
+      {/* Urgent Request Banner */}
       <section className="py-6 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-gradient-to-r from-blood-600 to-rose-600 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-lg shadow-red-200/50">
@@ -278,252 +195,194 @@ export function HomePage() {
                 </div>
                 <div className="text-sm text-red-100/90">
                   {language === 'bn'
-                    ? 'সরাসরি প্রস্তুত রক্তদাতাদের সাথে যোগাযোগ করুন।'
-                    : 'Reach out to ready donors directly within minutes.'}
+                    ? 'নিচে থেকে সরাসরি প্রস্তুত রক্তদাতাদের সাথে যোগাযোগ করুন।'
+                    : 'Filter available donors below and reach out directly within minutes.'}
                 </div>
               </div>
             </div>
-            <Link
-              to="/search?available=true"
+            <button
+              onClick={() => { setAvailableOnly(true); scrollToDonors(); }}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-blood-600 font-semibold rounded-xl hover:bg-red-50 transition-colors shadow"
             >
-              {language === 'bn' ? 'প্রস্তুত রক্তদাতা দেখুন' : 'View Available Donors'}
+              {language === 'bn' ? 'প্রস্তুত রক্তদাতা দেখুন' : 'Show Available Donors'}
               <ArrowRight className="w-4 h-4" />
-            </Link>
+            </button>
           </div>
         </div>
       </section>
 
-      {/* Recent Blood Warriors */}
-      <section className="py-16 sm:py-20 bg-red-50/40">
+      {/* Find Donors — full search inlined on home */}
+      <section id="find-donors" className="py-14 sm:py-20 bg-red-50/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+          <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-100 text-blood-600 rounded-full text-xs font-semibold mb-4 uppercase tracking-wider">
-              <Heart className="w-3 h-3" /> {language === 'bn' ? 'সাম্প্রতিক যোদ্ধা' : 'Recent Heroes'}
+              <Star className="w-3 h-3" /> {language === 'bn' ? 'রক্তদাতা খুঁজুন' : 'Find a Donor'}
             </div>
             <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-3">
-              {t.recentWarriors.title}
+              {t.search.title}
             </h2>
             <p className="text-gray-500 text-lg max-w-2xl mx-auto">
-              {t.recentWarriors.subtitle}
+              {t.search.subtitle}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-            {recentWarriors.map((warrior, i) => {
-              const colorIndex = warrior.name.charCodeAt(0) % bgColors.length;
-              const phoneDigits = warrior.phone.replace(/[^0-9]/g, '');
-              return (
-                <div
-                  key={warrior.id}
-                  className="bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl hover:border-red-100 transition-all duration-300 hover:-translate-y-1 animate-fade-in overflow-hidden"
-                  style={{ animationDelay: `${i * 0.05}s` }}
-                >
-                  <div className="p-5 sm:p-6">
-                    {/* Header: avatar + name + available pill */}
-                    <div className="flex items-start gap-4 mb-5">
-                      <div className="relative shrink-0">
-                        {warrior.image ? (
-                          <img src={warrior.image} alt={warrior.name} className="w-16 h-16 rounded-full object-cover ring-2 ring-red-100" />
-                        ) : (
-                          <div className={`w-16 h-16 rounded-full ${bgColors[colorIndex]} flex items-center justify-center ring-2 ring-red-100`}>
-                            <span className="text-white font-bold text-xl">{getInitials(warrior.name)}</span>
-                          </div>
-                        )}
-                        <span className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white ${warrior.available ? 'bg-green-500' : 'bg-gray-400'}`} />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h3 className="font-bold text-blood-600 text-lg leading-tight truncate">{warrior.name}</h3>
-                        <div className="mt-1.5">
-                          {warrior.available ? (
-                            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2.5 py-1 rounded-full">
-                              <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                              {language === 'bn' ? 'রক্তদানে প্রস্তুত' : 'Available to Donate'}
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 bg-gray-50 border border-gray-200 px-2.5 py-1 rounded-full">
-                              <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-                              {language === 'bn' ? 'এখন অপ্রাপ্য' : 'Currently Unavailable'}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
+          {/* Filters */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-6 mb-8">
+            <div className="flex items-center gap-2 mb-5">
+              <Filter className="w-5 h-5 text-blood-600" />
+              <span className="font-semibold text-gray-900">{t.search.search}</span>
+              <span className="ml-auto text-sm text-gray-500">
+                {filtered.length} {t.search.results}
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{t.search.bloodGroup}</label>
+                <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-gray-200 bg-white focus-within:border-blood-500 focus-within:ring-2 focus-within:ring-blood-500/20">
+                  <Droplets className="w-4 h-4 text-blood-500 shrink-0" />
+                  <select
+                    value={bloodGroup}
+                    onChange={e => { setBloodGroup(e.target.value); setPage(1); }}
+                    className="w-full bg-transparent text-sm text-gray-900 focus:outline-none"
+                  >
+                    <option value="">{t.search.allGroups}</option>
+                    {BLOOD_GROUPS.map(g => <option key={g} value={g}>{g}</option>)}
+                  </select>
+                </div>
+              </div>
 
-                    {/* Blood group pill - centered like reference */}
-                    <div className="flex justify-center mb-5">
-                      <div className="inline-flex flex-col items-center justify-center px-8 py-2.5 bg-gradient-to-br from-red-50 to-rose-50 rounded-full border border-red-100">
-                        <span className="text-2xl font-black text-blood-600 leading-none">{warrior.bloodGroup}</span>
-                        <span className="text-[10px] text-blood-500/80 font-medium mt-0.5 uppercase tracking-wide">
-                          {language === 'bn' ? 'রক্তদাতা' : 'Compatible Donor'}
-                        </span>
-                      </div>
-                    </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{t.search.location}</label>
+                <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-gray-200 bg-white focus-within:border-blood-500 focus-within:ring-2 focus-within:ring-blood-500/20">
+                  <MapPin className="w-4 h-4 text-blood-500 shrink-0" />
+                  <select
+                    value={location}
+                    onChange={e => { setLocation(e.target.value); setPage(1); }}
+                    className="w-full bg-transparent text-sm text-gray-900 focus:outline-none"
+                  >
+                    <option value="">{t.search.allLocations}</option>
+                    {LOCATIONS.map(loc => (
+                      <option key={loc.en} value={loc.en}>
+                        {language === 'bn' ? loc.bn : loc.en}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
 
-                    {/* Info rows */}
-                    <div className="space-y-2.5 mb-5">
-                      <div className="flex items-center gap-3 px-3.5 py-2.5 bg-gray-50 rounded-xl">
-                        <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
-                          <Building2 className="w-3.5 h-3.5 text-blue-600" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="text-[10px] text-gray-400 uppercase tracking-wide font-medium leading-none">
-                            {language === 'bn' ? 'এলাকা' : 'Area'}
-                          </div>
-                          <div className="text-sm text-gray-900 font-semibold truncate">{getLocationDisplay(warrior.location)}</div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 px-3.5 py-2.5 bg-gray-50 rounded-xl">
-                        <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
-                          <Calendar className="w-3.5 h-3.5 text-emerald-600" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="text-[10px] text-gray-400 uppercase tracking-wide font-medium leading-none">
-                            {language === 'bn' ? 'যোগদান' : 'Joined'}
-                          </div>
-                          <div className="text-sm text-gray-900 font-semibold truncate">{warrior.createdAt}</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Contact Numbers */}
-                    <div>
-                      <div className="text-xs text-gray-500 font-semibold mb-2">
-                        {language === 'bn' ? 'যোগাযোগ নম্বর' : 'Contact Number'}
-                      </div>
-                      <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl pl-3.5 pr-1.5 py-1.5">
-                        <span className="flex-1 text-sm font-medium text-gray-900 truncate">{warrior.phone}</span>
-                        <button
-                          onClick={() => copyPhone(warrior.phone)}
-                          className="w-9 h-9 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center transition-colors"
-                          title={language === 'bn' ? 'কপি করুন' : 'Copy'}
-                          aria-label="Copy phone"
-                        >
-                          <Copy className="w-4 h-4" />
-                        </button>
-                        <a
-                          href={`https://wa.me/${phoneDigits}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-9 h-9 rounded-lg bg-green-500 hover:bg-green-600 text-white flex items-center justify-center transition-colors"
-                          title="WhatsApp"
-                          aria-label="WhatsApp"
-                        >
-                          <MessageCircle className="w-4 h-4" />
-                        </a>
-                        <a
-                          href={`tel:${warrior.phone}`}
-                          className="w-9 h-9 rounded-lg bg-green-50 hover:bg-green-100 text-green-700 flex items-center justify-center transition-colors"
-                          title={language === 'bn' ? 'কল করুন' : 'Call'}
-                          aria-label="Call"
-                        >
-                          <Phone className="w-4 h-4" />
-                        </a>
-                      </div>
+              <div className="flex items-end">
+                <label className="flex items-center gap-3 cursor-pointer px-1 py-2.5">
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={availableOnly}
+                      onChange={e => { setAvailableOnly(e.target.checked); setPage(1); }}
+                      className="sr-only"
+                    />
+                    <div className={`w-11 h-6 rounded-full transition-colors ${availableOnly ? 'bg-blood-600' : 'bg-gray-300'}`}>
+                      <div className={`w-5 h-5 bg-white rounded-full shadow-md transform transition-transform mt-0.5 ${availableOnly ? 'translate-x-5.5 ml-0.5' : 'translate-x-0.5'}`} />
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="text-center mt-8">
-            <Link
-              to="/search"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-white text-blood-600 font-semibold rounded-xl border border-red-100 hover:bg-red-50 transition-all hover:-translate-y-0.5 shadow-sm"
-            >
-              {t.hero.findDonor}
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Blood Group Quick Search */}
-      <section className="py-16 sm:py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-3">
-              {language === 'bn' ? 'রক্তের গ্রুপ অনুযায়ী খুঁজুন' : 'Search by Blood Group'}
-            </h2>
-            <p className="text-gray-500">
-              {language === 'bn' ? 'আপনার প্রয়োজনীয় রক্তের গ্রুপ নির্বাচন করুন' : 'Select the blood group you need'}
-            </p>
-          </div>
-          <div className="grid grid-cols-4 sm:grid-cols-8 gap-3 sm:gap-4 max-w-3xl mx-auto">
-            {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(group => {
-              const count = donors.filter(d => d.bloodGroup === group && d.available).length;
-              return (
-                <Link
-                  key={group}
-                  to={`/search?bloodGroup=${encodeURIComponent(group)}`}
-                  className="flex flex-col items-center py-5 px-3 bg-white rounded-2xl border border-gray-100 hover:border-red-300 hover:shadow-xl transition-all duration-300 group hover:-translate-y-1"
-                >
-                  <span className="text-2xl font-black text-blood-600 group-hover:scale-110 transition-transform">{group}</span>
-                  <span className="text-xs text-gray-400 font-medium mt-1">{count} {language === 'bn' ? 'জন' : 'avail.'}</span>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Why Us */}
-      <section className="py-20 sm:py-28 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-50 text-blood-600 rounded-full text-xs font-semibold mb-6 uppercase tracking-wider">
-                <Shield className="w-3 h-3" /> {language === 'bn' ? 'কেন আমরা' : 'Why Us'}
+                  <span className="text-sm font-medium text-gray-700">{t.search.availableOnly}</span>
+                </label>
               </div>
-              <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-6 leading-tight">
-                {language === 'bn' ? 'বিশ্বস্ত ও যাচাইকৃত রক্তদান প্ল্যাটফর্ম' : 'Trusted & Verified Blood Donation Platform'}
-              </h2>
-              <p className="text-gray-500 mb-8 leading-relaxed">
-                {language === 'bn'
-                  ? 'আমাদের প্ল্যাটফর্মে সকল রক্তদাতা যাচাইকৃত। নিরাপদে এবং দ্রুত রক্তদাতা খুঁজুন।'
-                  : 'All donors on our platform are verified. Find blood donors safely and quickly in your time of need.'}
-              </p>
-              <div className="space-y-4">
-                {[
-                  language === 'bn' ? 'যাচাইকৃত রক্তদাতা প্রোফাইল' : 'Verified Donor Profiles',
-                  language === 'bn' ? 'তাৎক্ষণিক অনুসন্ধান ফলাফল' : 'Instant Search Results',
-                  language === 'bn' ? '২৪/৭ জরুরি যোগাযোগ' : '24/7 Emergency Contact',
-                  language === 'bn' ? 'সম্পূর্ণ বিনামূল্যে সেবা' : 'Completely Free Service',
-                ].map((text, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-                      <span className="text-green-600 text-xs font-bold">✓</span>
-                    </div>
-                    <span className="text-gray-700 font-medium">{text}</span>
+
+              <div className="flex items-end">
+                <button
+                  onClick={handleReset}
+                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-600 hover:text-blood-600 bg-gray-50 hover:bg-red-50 border border-gray-200 hover:border-red-200 rounded-xl transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                  {t.search.reset}
+                </button>
+              </div>
+            </div>
+
+            {/* Quick blood-group chips */}
+            <div className="mt-5 pt-5 border-t border-gray-100">
+              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                {language === 'bn' ? 'দ্রুত নির্বাচন' : 'Quick Pick'}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {BLOOD_GROUPS.map(g => {
+                  const active = bloodGroup === g;
+                  const count = donors.filter(d => d.bloodGroup === g && d.available).length;
+                  return (
+                    <button
+                      key={g}
+                      onClick={() => { setBloodGroup(active ? '' : g); setPage(1); }}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${
+                        active
+                          ? 'bg-blood-600 text-white shadow shadow-red-200'
+                          : 'bg-red-50 text-blood-600 hover:bg-red-100 border border-red-100'
+                      }`}
+                    >
+                      {g}
+                      <span className={`text-xs font-semibold ${active ? 'text-red-100' : 'text-blood-400'}`}>
+                        ({count})
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Results */}
+          {paginated.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+                {paginated.map((donor, i) => (
+                  <div key={donor.id} className="animate-fade-in" style={{ animationDelay: `${i * 0.05}s` }}>
+                    <DonorCard donor={donor} />
                   </div>
                 ))}
               </div>
-            </div>
-            <div className="relative">
-              <div className="bg-gradient-to-br from-red-50 to-rose-50 rounded-3xl p-8 border border-red-100">
-                <div className="grid grid-cols-2 gap-4">
-                  {['A+', 'B+', 'O+', 'AB+'].map((group, i) => (
-                    <div key={i} className="bg-white rounded-2xl p-5 text-center shadow-sm border border-gray-100">
-                      <span className="text-2xl font-black text-blood-600">{group}</span>
-                      <p className="text-sm text-gray-400 mt-1">{donors.filter(d => d.bloodGroup === group).length} {language === 'bn' ? 'রক্তদাতা' : 'donors'}</p>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-4 bg-white rounded-2xl p-5 text-center shadow-sm border border-gray-100">
-                  <div className="flex items-center justify-center gap-3">
-                    <div className="animate-heartbeat">
-                      <Heart className="w-8 h-8 text-blood-500 fill-blood-500" />
-                    </div>
-                    <div>
-                      <p className="text-3xl font-black text-gray-900">{availableDonors}</p>
-                      <p className="text-sm text-gray-500">{language === 'bn' ? 'এখন রক্তদানে প্রস্তুত' : 'Ready to donate now'}</p>
-                    </div>
+
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-10 flex-wrap">
+                  <button
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={safePage === 1}
+                    className="flex items-center gap-1 px-4 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    {t.search.prev}
+                  </button>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: totalPages }).map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setPage(i + 1)}
+                        className={`w-10 h-10 rounded-xl text-sm font-semibold transition-all ${
+                          safePage === i + 1
+                            ? 'bg-blood-600 text-white shadow-md shadow-red-200'
+                            : 'text-gray-600 hover:bg-gray-100'
+                        }`}
+                      >
+                        {i + 1}
+                      </button>
+                    ))}
                   </div>
+                  <button
+                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                    disabled={safePage === totalPages}
+                    className="flex items-center gap-1 px-4 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {t.search.next}
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
                 </div>
+              )}
+            </>
+          ) : (
+            <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
+              <div className="w-20 h-20 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-5">
+                <Search className="w-8 h-8 text-blood-300" />
               </div>
+              <p className="text-gray-500 font-medium">{t.search.noResults}</p>
             </div>
-          </div>
+          )}
         </div>
       </section>
 
@@ -542,13 +401,13 @@ export function HomePage() {
               {t.cta.button}
               <ArrowRight className="w-5 h-5" />
             </Link>
-            <Link
-              to="/search"
+            <button
+              onClick={scrollToDonors}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 text-white font-bold rounded-2xl border-2 border-white/20 hover:bg-white/20 transition-all hover:-translate-y-0.5"
             >
               <Search className="w-5 h-5" />
               {t.hero.findDonor}
-            </Link>
+            </button>
           </div>
         </div>
       </section>
