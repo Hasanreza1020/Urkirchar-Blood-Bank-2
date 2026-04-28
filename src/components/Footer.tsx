@@ -67,12 +67,11 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-gray-500">
-            © {new Date().getFullYear()} Urkirchar Blood Bank. {t.footer.rights}
-          </p>
-          <p className="text-sm text-gray-500 flex items-center gap-1.5">
-            Made with <Heart className="w-3.5 h-3.5 text-blood-500 fill-blood-500" /> by{' '}
+        <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col items-center gap-3 text-center">
+          <p className="text-sm text-gray-300 flex items-center gap-1.5 flex-wrap justify-center">
+            {language === 'bn' ? 'উরকিরচর কমিউনিটির জন্য ভালোবাসায় তৈরি' : 'Made out of love for the Urkirchar community'}
+            <Heart className="w-3.5 h-3.5 text-blood-500 fill-blood-500" />
+            {language === 'bn' ? 'দ্বারা' : 'by'}
             <a
               href="https://www.facebook.com/Hasanreza101"
               target="_blank"
@@ -82,6 +81,9 @@ export function Footer() {
               Hasan Reza
               <ExternalLink className="w-3 h-3" />
             </a>
+          </p>
+          <p className="text-xs text-gray-500">
+            © {new Date().getFullYear()} Urkirchar Blood Bank. {t.footer.rights}
           </p>
         </div>
       </div>

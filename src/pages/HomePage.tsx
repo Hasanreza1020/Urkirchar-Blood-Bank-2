@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import { Search, UserPlus, Users, Heart, Droplets, ArrowRight, UserCheck, ClipboardCheck, HeartHandshake, Shield, Star, CircleCheck as CheckCircle, MapPin, Calendar } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Search, UserPlus, Users, Heart, Droplets, ArrowRight, UserCheck, ClipboardCheck, HeartHandshake, Shield, Star, CircleCheck as CheckCircle, MapPin, Calendar, Phone, MessageCircle, Copy, Building2, AlertCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { useTranslation } from '../hooks/useTranslation';
 import { useStore, LOCATIONS } from '../store/supabaseStore';
 
@@ -45,6 +46,10 @@ function BloodDropIcon({ className }: { className?: string }) {
 export function HomePage() {
   const { t, language } = useTranslation();
   const donors = useStore(state => state.donors);
+  const navigate = useNavigate();
+
+  const [quickBloodGroup, setQuickBloodGroup] = useState('');
+  const [quickLocation, setQuickLocation] = useState('');
 
   const totalDonors = donors.length;
   const availableDonors = donors.filter(d => d.available).length;
@@ -52,7 +57,20 @@ export function HomePage() {
 
   const recentWarriors = [...donors]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 12);
+    .slice(0, 8);
+
+  const handleQuickSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (quickBloodGroup) params.set('bloodGroup', quickBloodGroup);
+    if (quickLocation) params.set('location', quickLocation);
+    navigate(`/search?${params.toString()}`);
+  };
+
+  const copyPhone = (phone: string) => {
+    navigator.clipboard.writeText(phone);
+    toast.success(language === 'bn' ? 'ফোন নম্বর কপি করা হয়েছে' : 'Phone number copied');
+  };
 
   const getInitials = (name: string) =>
     name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -124,7 +142,50 @@ export function HomePage() {
               </Link>
             </div>
 
-            
+            {/* Quick Search Bar (bupblood-inspired) */}
+            <form
+              onSubmit={handleQuickSearch}
+              className="mt-10 bg-white rounded-2xl shadow-xl shadow-red-100/50 border border-red-100 p-3 sm:p-4 max-w-3xl mx-auto animate-slide-up"
+              style={{ animationDelay: '0.3s' }}
+            >
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-red-50/40 rounded-xl border border-red-100/60">
+                  <Droplets className="w-4 h-4 text-blood-500 shrink-0" />
+                  <select
+                    value={quickBloodGroup}
+                    onChange={e => setQuickBloodGroup(e.target.value)}
+                    className="w-full bg-transparent text-sm text-gray-900 focus:outline-none cursor-pointer"
+                  >
+                    <option value="">{language === 'bn' ? 'রক্তের গ্রুপ' : 'Blood group'}</option>
+                    {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(g => (
+                      <option key={g} value={g}>{g}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-red-50/40 rounded-xl border border-red-100/60">
+                  <MapPin className="w-4 h-4 text-blood-500 shrink-0" />
+                  <select
+                    value={quickLocation}
+                    onChange={e => setQuickLocation(e.target.value)}
+                    className="w-full bg-transparent text-sm text-gray-900 focus:outline-none cursor-pointer"
+                  >
+                    <option value="">{language === 'bn' ? 'এলাকা (যেকোনো)' : 'Area (any)'}</option>
+                    {LOCATIONS.map(loc => (
+                      <option key={loc.en} value={loc.en}>
+                        {language === 'bn' ? loc.bn : loc.en}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <button
+                  type="submit"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blood-600 to-blood-500 text-white font-semibold rounded-xl hover:from-blood-700 hover:to-blood-600 transition-all shadow-md"
+                >
+                  <Search className="w-4 h-4" />
+                  {language === 'bn' ? 'খুঁজুন' : 'Search'}
+                </button>
+              </div>
+            </form>
           </div>
 
           <div className="mt-16 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-4xl mx-auto">
@@ -203,6 +264,36 @@ export function HomePage() {
         </div>
       </section>
 
+      {/* Urgent Request Banner (bupblood-inspired) */}
+      <section className="py-6 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-gradient-to-r from-blood-600 to-rose-600 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-lg shadow-red-200/50">
+            <div className="flex items-center gap-3 flex-1">
+              <div className="w-11 h-11 bg-white/20 rounded-xl flex items-center justify-center shrink-0 animate-pulse">
+                <AlertCircle className="w-5 h-5 text-white" />
+              </div>
+              <div className="text-white">
+                <div className="font-bold text-base sm:text-lg leading-tight">
+                  {language === 'bn' ? 'জরুরি রক্তের প্রয়োজন?' : 'Need blood urgently?'}
+                </div>
+                <div className="text-sm text-red-100/90">
+                  {language === 'bn'
+                    ? 'সরাসরি প্রস্তুত রক্তদাতাদের সাথে যোগাযোগ করুন।'
+                    : 'Reach out to ready donors directly within minutes.'}
+                </div>
+              </div>
+            </div>
+            <Link
+              to="/search?available=true"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-blood-600 font-semibold rounded-xl hover:bg-red-50 transition-colors shadow"
+            >
+              {language === 'bn' ? 'প্রস্তুত রক্তদাতা দেখুন' : 'View Available Donors'}
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Recent Blood Warriors */}
       <section className="py-16 sm:py-20 bg-red-50/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -218,46 +309,117 @@ export function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
             {recentWarriors.map((warrior, i) => {
               const colorIndex = warrior.name.charCodeAt(0) % bgColors.length;
+              const phoneDigits = warrior.phone.replace(/[^0-9]/g, '');
               return (
                 <div
                   key={warrior.id}
-                  className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5 hover:shadow-lg hover:border-red-100 transition-all duration-300 hover:-translate-y-1 animate-fade-in group"
+                  className="bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl hover:border-red-100 transition-all duration-300 hover:-translate-y-1 animate-fade-in overflow-hidden"
                   style={{ animationDelay: `${i * 0.05}s` }}
                 >
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="relative shrink-0">
-                      {warrior.image ? (
-                        <img src={warrior.image} alt={warrior.name} className="w-11 h-11 rounded-xl object-cover" />
-                      ) : (
-                        <div className={`w-11 h-11 rounded-xl ${bgColors[colorIndex]} flex items-center justify-center`}>
-                          <span className="text-white font-bold text-sm">{getInitials(warrior.name)}</span>
+                  <div className="p-5 sm:p-6">
+                    {/* Header: avatar + name + available pill */}
+                    <div className="flex items-start gap-4 mb-5">
+                      <div className="relative shrink-0">
+                        {warrior.image ? (
+                          <img src={warrior.image} alt={warrior.name} className="w-16 h-16 rounded-full object-cover ring-2 ring-red-100" />
+                        ) : (
+                          <div className={`w-16 h-16 rounded-full ${bgColors[colorIndex]} flex items-center justify-center ring-2 ring-red-100`}>
+                            <span className="text-white font-bold text-xl">{getInitials(warrior.name)}</span>
+                          </div>
+                        )}
+                        <span className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white ${warrior.available ? 'bg-green-500' : 'bg-gray-400'}`} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-bold text-blood-600 text-lg leading-tight truncate">{warrior.name}</h3>
+                        <div className="mt-1.5">
+                          {warrior.available ? (
+                            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2.5 py-1 rounded-full">
+                              <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                              {language === 'bn' ? 'রক্তদানে প্রস্তুত' : 'Available to Donate'}
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 bg-gray-50 border border-gray-200 px-2.5 py-1 rounded-full">
+                              <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
+                              {language === 'bn' ? 'এখন অপ্রাপ্য' : 'Currently Unavailable'}
+                            </span>
+                          )}
                         </div>
-                      )}
-                      {warrior.verified && (
-                        <CheckCircle className="absolute -bottom-1 -right-1 w-4 h-4 text-blue-500 fill-blue-500 stroke-white" strokeWidth={3} />
-                      )}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-semibold text-gray-900 text-sm truncate">{warrior.name}</h3>
-                      <div className="flex items-center gap-1 text-xs text-gray-400">
-                        <MapPin className="w-3 h-3 shrink-0" />
-                        <span className="truncate">{getLocationDisplay(warrior.location)}</span>
                       </div>
                     </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="bg-red-50 text-blood-600 font-black text-xs px-2.5 py-1 rounded-lg border border-red-100">
-                      {warrior.bloodGroup}
-                    </span>
-                    <div className="flex items-center gap-1.5">
-                      <span className={`w-2 h-2 rounded-full ${warrior.available ? 'bg-green-500' : 'bg-gray-400'}`} />
-                      <span className="text-xs text-gray-400 flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        {warrior.createdAt}
-                      </span>
+
+                    {/* Blood group pill - centered like reference */}
+                    <div className="flex justify-center mb-5">
+                      <div className="inline-flex flex-col items-center justify-center px-8 py-2.5 bg-gradient-to-br from-red-50 to-rose-50 rounded-full border border-red-100">
+                        <span className="text-2xl font-black text-blood-600 leading-none">{warrior.bloodGroup}</span>
+                        <span className="text-[10px] text-blood-500/80 font-medium mt-0.5 uppercase tracking-wide">
+                          {language === 'bn' ? 'রক্তদাতা' : 'Compatible Donor'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Info rows */}
+                    <div className="space-y-2.5 mb-5">
+                      <div className="flex items-center gap-3 px-3.5 py-2.5 bg-gray-50 rounded-xl">
+                        <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                          <Building2 className="w-3.5 h-3.5 text-blue-600" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-[10px] text-gray-400 uppercase tracking-wide font-medium leading-none">
+                            {language === 'bn' ? 'এলাকা' : 'Area'}
+                          </div>
+                          <div className="text-sm text-gray-900 font-semibold truncate">{getLocationDisplay(warrior.location)}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 px-3.5 py-2.5 bg-gray-50 rounded-xl">
+                        <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
+                          <Calendar className="w-3.5 h-3.5 text-emerald-600" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-[10px] text-gray-400 uppercase tracking-wide font-medium leading-none">
+                            {language === 'bn' ? 'যোগদান' : 'Joined'}
+                          </div>
+                          <div className="text-sm text-gray-900 font-semibold truncate">{warrior.createdAt}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Contact Numbers */}
+                    <div>
+                      <div className="text-xs text-gray-500 font-semibold mb-2">
+                        {language === 'bn' ? 'যোগাযোগ নম্বর' : 'Contact Number'}
+                      </div>
+                      <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl pl-3.5 pr-1.5 py-1.5">
+                        <span className="flex-1 text-sm font-medium text-gray-900 truncate">{warrior.phone}</span>
+                        <button
+                          onClick={() => copyPhone(warrior.phone)}
+                          className="w-9 h-9 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center transition-colors"
+                          title={language === 'bn' ? 'কপি করুন' : 'Copy'}
+                          aria-label="Copy phone"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </button>
+                        <a
+                          href={`https://wa.me/${phoneDigits}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-9 h-9 rounded-lg bg-green-500 hover:bg-green-600 text-white flex items-center justify-center transition-colors"
+                          title="WhatsApp"
+                          aria-label="WhatsApp"
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                        </a>
+                        <a
+                          href={`tel:${warrior.phone}`}
+                          className="w-9 h-9 rounded-lg bg-green-50 hover:bg-green-100 text-green-700 flex items-center justify-center transition-colors"
+                          title={language === 'bn' ? 'কল করুন' : 'Call'}
+                          aria-label="Call"
+                        >
+                          <Phone className="w-4 h-4" />
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>
