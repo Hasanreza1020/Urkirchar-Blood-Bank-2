@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Heart, Menu, X, User, LogOut, Shield, Search, Home, Globe } from 'lucide-react';
+import { Heart, Menu, X, User, LogOut, Shield, Search, Home, Globe, Droplets } from 'lucide-react';
 import { useStore } from '../store/supabaseStore';
 import { useTranslation } from '../hooks/useTranslation';
 import toast from 'react-hot-toast';
@@ -36,8 +36,8 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-2.5 group shrink-0" onClick={() => setOpen(false)}>
-            <div className="w-9 h-9 bg-blood-600 rounded-xl flex items-center justify-center group-hover:bg-blood-700 transition-colors shrink-0">
-              <Heart className="w-5 h-5 text-white fill-white" />
+            <div className="w-9 h-9 bg-gradient-to-br from-blood-500 to-blood-700 rounded-xl flex items-center justify-center shrink-0">
+              <Droplets className="w-5 h-5 text-white" />
             </div>
             <div className="min-w-0">
               <div className="font-bold text-gray-900 text-sm leading-tight truncate">

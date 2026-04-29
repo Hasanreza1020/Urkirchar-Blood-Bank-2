@@ -36,7 +36,7 @@ export function DonorCard({ donor }: DonorCardProps) {
       <div className="h-1.5 bg-gradient-to-r from-blood-500 via-rose-500 to-blood-600" />
 
       <div className="p-4 sm:p-5">
-        {/* Header: avatar + name + blood group chip on the right */}
+        {/* Header: avatar + name */}
         <div className="flex items-center gap-3 mb-4">
           <div className="relative shrink-0">
             {donor.image ? (
@@ -58,8 +58,15 @@ export function DonorCard({ donor }: DonorCardProps) {
                 : (language === 'bn' ? 'বর্তমানে অপ্রাপ্য' : 'Currently unavailable')}
             </span>
           </div>
-          <div className="shrink-0 flex flex-col items-center justify-center min-w-[3.25rem] px-2.5 py-1.5 bg-gradient-to-br from-blood-600 to-rose-600 text-white rounded-xl shadow-sm">
-            <span className="text-base font-black leading-none">{donor.bloodGroup}</span>
+        </div>
+
+        {/* Centered blood group pill */}
+        <div className="flex justify-center mb-4">
+          <div className="inline-flex flex-col items-center justify-center px-10 py-2 bg-gradient-to-br from-red-50 to-rose-100/70 border border-red-100 rounded-full">
+            <span className="text-3xl font-black text-blood-600 leading-none">{donor.bloodGroup}</span>
+            <span className="text-[10px] text-blood-500/80 font-semibold mt-1 uppercase tracking-wider">
+              {language === 'bn' ? 'রক্তদাতা' : 'Compatible Donor'}
+            </span>
           </div>
         </div>
 

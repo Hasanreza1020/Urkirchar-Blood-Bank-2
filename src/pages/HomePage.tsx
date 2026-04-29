@@ -321,6 +321,106 @@ export function HomePage() {
         </div>
       </section>
 
+      {/* About Us */}
+      <section id="about" className="py-16 sm:py-24 bg-white">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-50 text-blood-600 rounded-full text-xs font-semibold mb-4 uppercase tracking-wider">
+              <HeartHandshake className="w-3 h-3" /> {language === 'bn' ? 'আমাদের সম্পর্কে' : 'About Us'}
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-3">
+              {language === 'bn' ? 'আমরা কেন এই প্ল্যাটফর্ম তৈরি করেছি' : 'Why we built this platform'}
+            </h2>
+            <p className="text-gray-500 max-w-2xl mx-auto">
+              {language === 'bn'
+                ? 'উরকিরচর শান্তি সংঘ দ্বারা পরিচালিত একটি কমিউনিটি উদ্যোগ।'
+                : 'A community initiative managed by Urkirchar Shanti Sangha.'}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+            <div className="space-y-5 text-gray-600 leading-relaxed">
+              {language === 'bn' ? (
+                <>
+                  <p>
+                    জরুরি মুহূর্তে রক্ত খুঁজে পাওয়া উরকিরচরের মানুষের জন্য দীর্ঘদিনের একটি সংগ্রাম। প্রিয়জনের জন্য রক্তদাতা খুঁজতে গিয়ে পরিবারগুলোকে যে অসহায়তা ও আতঙ্কের মধ্য দিয়ে যেতে হয়, তা আমরা নিজের চোখে দেখেছি।
+                  </p>
+                  <p>
+                    সেই কথা মাথায় রেখেই <span className="font-semibold text-gray-900">উরকিরচর শান্তি সংঘ</span> এই প্ল্যাটফর্মটি তৈরি করেছে — যেখানে রক্তের গ্রুপ ও এলাকা অনুযায়ী কয়েক মিনিটেই উরকিরচরের যাচাইকৃত রক্তদাতাদের খুঁজে পাওয়া যায় এবং সরাসরি কল বা হোয়াটসঅ্যাপে যোগাযোগ করা যায়।
+                  </p>
+                  <p>
+                    আপনি যদি একজন রক্তদাতা হিসেবে নিবন্ধন করেন, তবে আপনি কারো সবচেয়ে কঠিন দিনে তাদের আশার আলো হয়ে উঠবেন — হয়তো অপরিচিত কারো জন্য, প্রতিবেশীর জন্য, কিংবা আপনার নিজের প্রিয়জনের জন্য।
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p>
+                    Finding blood in time of need has long been a struggle for the people of Urkirchar. We have watched families search desperately for donors during emergencies, often turning to strangers and social media in moments of fear and helplessness.
+                  </p>
+                  <p>
+                    Thinking about that, <span className="font-semibold text-gray-900">Urkirchar Shanti Sangha</span> built this platform — a single place where anyone can search verified donors by blood group and area in minutes, and reach them directly through call or WhatsApp without going through middlemen.
+                  </p>
+                  <p>
+                    When you register as a donor, you become someone&apos;s hope on their darkest day — for a stranger, for a neighbor, perhaps even for someone you love. Every drop you give can save a life. Join the community and be the reason a family doesn&apos;t lose hope tonight.
+                  </p>
+                </>
+              )}
+
+              <div className="pt-2">
+                <Link
+                  to="/register"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blood-600 to-blood-500 text-white font-semibold rounded-xl hover:from-blood-700 hover:to-blood-600 transition-all shadow-md text-sm"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  {language === 'bn' ? 'রক্তদাতা হিসেবে নিবন্ধন করুন' : 'Register as a donor'}
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[
+                {
+                  icon: Search,
+                  title: language === 'bn' ? 'দ্রুত অনুসন্ধান' : 'Fast search',
+                  desc: language === 'bn' ? 'রক্তের গ্রুপ ও এলাকা অনুযায়ী মুহূর্তেই যাচাইকৃত রক্তদাতা খুঁজুন।' : 'Find verified donors by blood group and area in seconds.',
+                  color: 'bg-red-50', iconColor: '#dc2626',
+                },
+                {
+                  icon: Heart,
+                  title: language === 'bn' ? 'সরাসরি যোগাযোগ' : 'Direct contact',
+                  desc: language === 'bn' ? 'কোনো মধ্যস্থ নেই — সরাসরি কল বা হোয়াটসঅ্যাপে যোগাযোগ করুন।' : 'No middlemen — reach the donor directly via call or WhatsApp.',
+                  color: 'bg-green-50', iconColor: '#22c55e',
+                },
+                {
+                  icon: Droplets,
+                  title: language === 'bn' ? 'যাচাইকৃত রক্তদাতা' : 'Verified donors',
+                  desc: language === 'bn' ? 'নিরাপত্তার জন্য প্রতিটি রক্তদাতার তথ্য আমরা যাচাই করি।' : 'Every donor profile is reviewed and verified for safety.',
+                  color: 'bg-purple-50', iconColor: '#a855f7',
+                },
+                {
+                  icon: HeartHandshake,
+                  title: language === 'bn' ? 'কমিউনিটি দ্বারা পরিচালিত' : 'Run by the community',
+                  desc: language === 'bn' ? 'উরকিরচর শান্তি সংঘ দ্বারা পরিচালিত — সম্পূর্ণ বিনামূল্যে।' : 'Managed by Urkirchar Shanti Sangha — completely free to use.',
+                  color: 'bg-amber-50', iconColor: '#f59e0b',
+                },
+              ].map((card, i) => (
+                <div
+                  key={i}
+                  className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+                >
+                  <div className={`w-10 h-10 ${card.color} rounded-xl flex items-center justify-center mb-3`}>
+                    <card.icon className="w-5 h-5" style={{ color: card.iconColor }} />
+                  </div>
+                  <h3 className="font-bold text-gray-900 text-sm mb-1.5">{card.title}</h3>
+                  <p className="text-xs text-gray-500 leading-relaxed">{card.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="py-20 sm:py-24 bg-gradient-to-br from-blood-600 via-blood-700 to-blood-800 relative overflow-hidden">
         <div className="absolute top-10 left-10 opacity-10 animate-float"><BloodDropIcon className="w-12 h-12 text-white" /></div>
