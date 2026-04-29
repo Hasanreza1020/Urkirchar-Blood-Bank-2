@@ -1,4 +1,4 @@
-import { CircleCheck as CheckCircle, Calendar, Phone, MessageCircle, Copy, Building2, Droplets } from 'lucide-react';
+import { Phone, MessageCircle, Copy, MapPin } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useTranslation } from '../hooks/useTranslation';
 import { LOCATIONS } from '../store/supabaseStore';
@@ -31,124 +31,74 @@ export function DonorCard({ donor }: DonorCardProps) {
   };
 
   return (
-    <div className="bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl hover:border-red-100 transition-all duration-300 hover:-translate-y-1 overflow-hidden">
-      <div className="p-5 sm:p-6">
-        {/* Header: avatar + name + available pill */}
-        <div className="flex items-start gap-4 mb-5">
+    <div className="relative bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:border-red-100 transition-all duration-300 hover:-translate-y-0.5 overflow-hidden">
+      {/* Top accent bar */}
+      <div className="h-1.5 bg-gradient-to-r from-blood-500 via-rose-500 to-blood-600" />
+
+      <div className="p-4 sm:p-5">
+        {/* Header: avatar + name + blood group chip on the right */}
+        <div className="flex items-center gap-3 mb-4">
           <div className="relative shrink-0">
             {donor.image ? (
-              <img src={donor.image} alt={donor.name} className="w-16 h-16 rounded-full object-cover ring-2 ring-red-100" />
+              <img src={donor.image} alt={donor.name} className="w-12 h-12 rounded-xl object-cover" />
             ) : (
-              <div className={`w-16 h-16 rounded-full ${bgColors[colorIndex]} flex items-center justify-center ring-2 ring-red-100`}>
-                <span className="text-white font-bold text-xl">{getInitials(donor.name)}</span>
+              <div className={`w-12 h-12 rounded-xl ${bgColors[colorIndex]} flex items-center justify-center`}>
+                <span className="text-white font-bold text-base">{getInitials(donor.name)}</span>
               </div>
             )}
-            <span className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white ${donor.available ? 'bg-green-500' : 'bg-gray-400'}`} />
+            {donor.available && (
+              <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-green-500 border-2 border-white" />
+            )}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5">
-              <h3 className="font-bold text-blood-600 text-lg leading-tight truncate">{donor.name}</h3>
-              {donor.verified && (
-                <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 fill-blue-500 stroke-white" strokeWidth={2.5} />
-              )}
-            </div>
-            <div className="mt-1.5">
-              {donor.available ? (
-                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2.5 py-1 rounded-full">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                  {language === 'bn' ? 'রক্তদানে প্রস্তুত' : 'Available to Donate'}
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 bg-gray-50 border border-gray-200 px-2.5 py-1 rounded-full">
-                  <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-                  {language === 'bn' ? 'এখন অপ্রাপ্য' : 'Currently Unavailable'}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Blood group pill - centered */}
-        <div className="flex justify-center mb-5">
-          <div className="inline-flex flex-col items-center justify-center px-8 py-2.5 bg-gradient-to-br from-red-50 to-rose-50 rounded-full border border-red-100">
-            <span className="text-2xl font-black text-blood-600 leading-none">{donor.bloodGroup}</span>
-            <span className="text-[10px] text-blood-500/80 font-medium mt-0.5 uppercase tracking-wide">
-              {language === 'bn' ? 'রক্তদাতা' : 'Compatible Donor'}
+            <h3 className="font-bold text-gray-900 text-base leading-tight truncate">{donor.name}</h3>
+            <span className="text-xs text-gray-400 font-medium">
+              {donor.available
+                ? (language === 'bn' ? 'প্রস্তুত' : 'Ready to donate')
+                : (language === 'bn' ? 'বর্তমানে অপ্রাপ্য' : 'Currently unavailable')}
             </span>
           </div>
-        </div>
-
-        {/* Info rows */}
-        <div className="space-y-2.5 mb-5">
-          <div className="flex items-center gap-3 px-3.5 py-2.5 bg-gray-50 rounded-xl">
-            <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
-              <Building2 className="w-3.5 h-3.5 text-blue-600" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-[10px] text-gray-400 uppercase tracking-wide font-medium leading-none">
-                {language === 'bn' ? 'এলাকা' : 'Area'}
-              </div>
-              <div className="text-sm text-gray-900 font-semibold truncate">{locationDisplay}</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 px-3.5 py-2.5 bg-gray-50 rounded-xl">
-            <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
-              <Calendar className="w-3.5 h-3.5 text-emerald-600" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-[10px] text-gray-400 uppercase tracking-wide font-medium leading-none">
-                {language === 'bn' ? 'সর্বশেষ রক্তদান' : 'Last Donation'}
-              </div>
-              <div className="text-sm text-gray-900 font-semibold truncate">{donor.lastDonation}</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 px-3.5 py-2.5 bg-gray-50 rounded-xl">
-            <div className="w-7 h-7 rounded-lg bg-purple-50 flex items-center justify-center shrink-0">
-              <Droplets className="w-3.5 h-3.5 text-purple-600" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-[10px] text-gray-400 uppercase tracking-wide font-medium leading-none">
-                {language === 'bn' ? 'যোগদান' : 'Joined'}
-              </div>
-              <div className="text-sm text-gray-900 font-semibold truncate">{donor.createdAt}</div>
-            </div>
+          <div className="shrink-0 flex flex-col items-center justify-center min-w-[3.25rem] px-2.5 py-1.5 bg-gradient-to-br from-blood-600 to-rose-600 text-white rounded-xl shadow-sm">
+            <span className="text-base font-black leading-none">{donor.bloodGroup}</span>
           </div>
         </div>
 
-        {/* Contact Number */}
-        <div>
-          <div className="text-xs text-gray-500 font-semibold mb-2">
-            {language === 'bn' ? 'যোগাযোগ নম্বর' : 'Contact Number'}
-          </div>
-          <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl pl-3.5 pr-1.5 py-1.5">
-            <span className="flex-1 text-sm font-medium text-gray-900 truncate">{donor.phone}</span>
-            <button
-              onClick={copyPhone}
-              className="w-9 h-9 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center transition-colors"
-              title={language === 'bn' ? 'কপি করুন' : 'Copy'}
-              aria-label="Copy phone"
-            >
-              <Copy className="w-4 h-4" />
-            </button>
-            <a
-              href={`https://wa.me/${phoneDigits}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-9 h-9 rounded-lg bg-green-500 hover:bg-green-600 text-white flex items-center justify-center transition-colors"
-              title="WhatsApp"
-              aria-label="WhatsApp"
-            >
-              <MessageCircle className="w-4 h-4" />
-            </a>
-            <a
-              href={`tel:${donor.phone}`}
-              className="w-9 h-9 rounded-lg bg-green-50 hover:bg-green-100 text-green-700 flex items-center justify-center transition-colors"
-              title={language === 'bn' ? 'কল করুন' : 'Call'}
-              aria-label="Call"
-            >
-              <Phone className="w-4 h-4" />
-            </a>
-          </div>
+        {/* Address box */}
+        <div className="flex items-center gap-2.5 px-3 py-2.5 bg-red-50/40 border border-red-100/60 rounded-xl mb-2.5">
+          <MapPin className="w-4 h-4 text-blood-500 shrink-0" />
+          <span className="text-sm text-gray-700 font-medium truncate">{locationDisplay}</span>
+        </div>
+
+        {/* Mobile number box */}
+        <div className="flex items-center gap-1.5 pl-3 pr-1.5 py-1.5 bg-gray-50 border border-gray-200 rounded-xl">
+          <Phone className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+          <span className="flex-1 text-sm font-semibold text-gray-900 truncate tracking-wide">{donor.phone}</span>
+          <button
+            onClick={copyPhone}
+            className="w-8 h-8 rounded-lg bg-white hover:bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center transition-colors"
+            title={language === 'bn' ? 'কপি করুন' : 'Copy'}
+            aria-label="Copy phone"
+          >
+            <Copy className="w-3.5 h-3.5" />
+          </button>
+          <a
+            href={`https://wa.me/${phoneDigits}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-8 h-8 rounded-lg bg-green-500 hover:bg-green-600 text-white flex items-center justify-center transition-colors"
+            title="WhatsApp"
+            aria-label="WhatsApp"
+          >
+            <MessageCircle className="w-3.5 h-3.5" />
+          </a>
+          <a
+            href={`tel:${donor.phone}`}
+            className="w-8 h-8 rounded-lg bg-blood-600 hover:bg-blood-700 text-white flex items-center justify-center transition-colors"
+            title={language === 'bn' ? 'কল করুন' : 'Call'}
+            aria-label="Call"
+          >
+            <Phone className="w-3.5 h-3.5" />
+          </a>
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, UserPlus, Users, Heart, Droplets, ArrowRight, ListFilter as Filter, ChevronLeft, ChevronRight, X, AlertCircle, MapPin, HeartHandshake, Star } from 'lucide-react';
+import { Search, UserPlus, Users, Heart, Droplets, ArrowRight, ListFilter as Filter, ChevronLeft, ChevronRight, X, MapPin, HeartHandshake, Star } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation';
 import { useStore, LOCATIONS } from '../store/supabaseStore';
 import { DonorCard } from '../components/DonorCard';
@@ -85,128 +85,63 @@ export function HomePage() {
 
   return (
     <div className="bg-white">
-      {/* Hero Section */}
+      {/* Hero Section — slim */}
       <section className="relative overflow-hidden bg-gradient-to-b from-red-50/60 via-white to-white">
-        <div className="absolute top-20 left-10 w-80 h-80 bg-red-100/40 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob" />
-        <div className="absolute top-40 right-10 w-80 h-80 bg-pink-100/40 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-0 left-10 w-72 h-72 bg-red-100/40 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob" />
+        <div className="absolute top-10 right-10 w-72 h-72 bg-pink-100/40 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob" style={{ animationDelay: '2s' }} />
 
-        <div className="absolute top-32 right-[15%] opacity-10 animate-float" style={{ animationDelay: '0s' }}>
-          <BloodDropIcon className="w-8 h-8 text-blood-600" />
-        </div>
-        <div className="absolute top-48 left-[10%] opacity-10 animate-float" style={{ animationDelay: '1s' }}>
-          <BloodDropIcon className="w-6 h-6 text-blood-500" />
-        </div>
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-16 sm:pt-20 sm:pb-20">
-          <div className="text-center max-w-4xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white text-blood-600 rounded-full text-sm font-medium mb-8 border border-red-100 shadow-sm animate-fade-in">
-              <div className="w-2 h-2 rounded-full bg-blood-500 animate-pulse" />
-              <span>{language === 'bn' ? 'উরকিরচর ব্লাড ব্যাংক — একসাথে জীবন বাঁচাই' : 'Urkirchar Blood Bank — Saving Lives Together'}</span>
-            </div>
-
-            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black text-gray-900 leading-[1.1] mb-6 tracking-tight animate-slide-up">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-8 sm:pt-12 sm:pb-10">
+          <div className="text-center max-w-3xl mx-auto">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 leading-tight mb-3 tracking-tight animate-slide-up">
               {t.hero.headline.split(' ').slice(0, -2).map((word, i) => (
                 <span key={i}>{word} </span>
               ))}
-              <span className="relative inline-block">
-                <span className="gradient-text">{t.hero.headline.split(' ').slice(-2).join(' ')}</span>
-                <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 200 12" fill="none">
-                  <path d="M2 8C40 2 80 2 100 6C120 10 160 10 198 4" stroke="#dc2626" strokeWidth="3" strokeLinecap="round" opacity="0.3" />
-                </svg>
-              </span>
+              <span className="gradient-text">{t.hero.headline.split(' ').slice(-2).join(' ')}</span>
             </h1>
 
-            <p className="text-lg sm:text-xl text-gray-500 mb-8 max-w-2xl mx-auto leading-relaxed animate-slide-up" style={{ animationDelay: '0.1s' }}>
+            <p className="text-sm sm:text-base text-gray-500 mb-5 max-w-xl mx-auto animate-slide-up" style={{ animationDelay: '0.1s' }}>
               {t.hero.subtext}
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 animate-slide-up" style={{ animationDelay: '0.2s' }}>
               <button
                 onClick={scrollToDonors}
-                className="w-full sm:w-auto group inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-gradient-to-r from-blood-600 to-blood-500 text-white font-semibold rounded-2xl hover:from-blood-700 hover:to-blood-600 transition-all shadow-xl shadow-red-200/50 hover:shadow-2xl hover:-translate-y-0.5"
+                className="w-full sm:w-auto group inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blood-600 to-blood-500 text-white font-semibold rounded-xl hover:from-blood-700 hover:to-blood-600 transition-all shadow-md shadow-red-200/50 hover:shadow-lg hover:-translate-y-0.5 text-sm"
               >
-                <Search className="w-5 h-5" />
+                <Search className="w-4 h-4" />
                 {t.hero.findDonor}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
               <Link
                 to="/register"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-white text-blood-600 font-semibold rounded-2xl border-2 border-red-100 hover:border-red-300 hover:bg-red-50 transition-all hover:-translate-y-0.5"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-blood-600 font-semibold rounded-xl border border-red-200 hover:border-red-300 hover:bg-red-50 transition-all text-sm"
               >
-                <UserPlus className="w-5 h-5" />
+                <UserPlus className="w-4 h-4" />
                 {t.hero.becomeDonor}
               </Link>
             </div>
           </div>
 
-          {/* Stats */}
-          <div className="mt-14 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-4xl mx-auto">
+          {/* Stats — compact strip */}
+          <div className="mt-8 grid grid-cols-4 gap-2 sm:gap-3 max-w-2xl mx-auto">
             {[
-              { label: t.stats.totalDonors, value: totalDonors, icon: Users, iconColor: '#dc2626', bg: 'bg-red-50' },
-              { label: t.stats.availableDonors, value: availableDonors, icon: Heart, iconColor: '#22c55e', bg: 'bg-green-50' },
-              { label: t.stats.bloodGroups, value: bloodGroups, icon: Droplets, iconColor: '#a855f7', bg: 'bg-purple-50' },
-              { label: t.stats.livesSaved, value: 150, icon: HeartHandshake, iconColor: '#f59e0b', bg: 'bg-amber-50' },
+              { label: t.stats.totalDonors, value: totalDonors, icon: Users, iconColor: '#dc2626' },
+              { label: t.stats.availableDonors, value: availableDonors, icon: Heart, iconColor: '#22c55e' },
+              { label: t.stats.bloodGroups, value: bloodGroups, icon: Droplets, iconColor: '#a855f7' },
+              { label: t.stats.livesSaved, value: 150, icon: HeartHandshake, iconColor: '#f59e0b' },
             ].map((stat, i) => (
               <div
                 key={i}
-                className="bg-white rounded-2xl p-5 sm:p-6 text-center border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 animate-slide-up"
-                style={{ animationDelay: `${0.3 + i * 0.1}s` }}
+                className="bg-white rounded-xl px-2 py-3 text-center border border-gray-100 shadow-sm animate-slide-up"
+                style={{ animationDelay: `${0.3 + i * 0.05}s` }}
               >
-                <div className={`w-12 h-12 ${stat.bg} rounded-2xl flex items-center justify-center mx-auto mb-4`}>
-                  <stat.icon className="w-6 h-6" style={{ color: stat.iconColor }} />
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-gray-900">
+                <stat.icon className="w-4 h-4 mx-auto mb-1.5" style={{ color: stat.iconColor }} />
+                <div className="text-lg sm:text-xl font-black text-gray-900 leading-none">
                   <AnimatedCounter end={stat.value} />
                 </div>
-                <div className="text-sm text-gray-500 mt-1 font-medium">{stat.label}</div>
+                <div className="text-[10px] sm:text-xs text-gray-500 mt-1 font-medium leading-tight">{stat.label}</div>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Marquee */}
-      <section className="py-4 bg-blood-600 overflow-hidden">
-        <div className="flex animate-marquee">
-          {[...Array(2)].map((_, setIdx) => (
-            <div key={setIdx} className="flex items-center gap-8 px-4 whitespace-nowrap">
-              {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map((group, i) => (
-                <span key={`${setIdx}-${i}`} className="flex items-center gap-2 text-white/80 text-sm font-medium">
-                  <BloodDropIcon className="w-3 h-3 text-white/50" />
-                  {group}
-                </span>
-              ))}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Urgent Request Banner */}
-      <section className="py-6 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-gradient-to-r from-blood-600 to-rose-600 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-lg shadow-red-200/50">
-            <div className="flex items-center gap-3 flex-1">
-              <div className="w-11 h-11 bg-white/20 rounded-xl flex items-center justify-center shrink-0 animate-pulse">
-                <AlertCircle className="w-5 h-5 text-white" />
-              </div>
-              <div className="text-white">
-                <div className="font-bold text-base sm:text-lg leading-tight">
-                  {language === 'bn' ? 'জরুরি রক্তের প্রয়োজন?' : 'Need blood urgently?'}
-                </div>
-                <div className="text-sm text-red-100/90">
-                  {language === 'bn'
-                    ? 'নিচে থেকে সরাসরি প্রস্তুত রক্তদাতাদের সাথে যোগাযোগ করুন।'
-                    : 'Filter available donors below and reach out directly within minutes.'}
-                </div>
-              </div>
-            </div>
-            <button
-              onClick={() => { setAvailableOnly(true); scrollToDonors(); }}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-blood-600 font-semibold rounded-xl hover:bg-red-50 transition-colors shadow"
-            >
-              {language === 'bn' ? 'প্রস্তুত রক্তদাতা দেখুন' : 'Show Available Donors'}
-              <ArrowRight className="w-4 h-4" />
-            </button>
           </div>
         </div>
       </section>
