@@ -115,7 +115,7 @@ interface StoreState {
 export const useStore = create<StoreState>()(
   persist(
     (set, get) => ({
-      language: 'en',
+      language: 'bn',
       setLanguage: (lang) => set({ language: lang }),
 
       currentUser: null,
@@ -269,7 +269,7 @@ export const useStore = create<StoreState>()(
       },
     }),
     {
-      name: 'urkirchar-blood-bank',
+      name: 'urkirchar-blood-bank-v3',
       partialize: (state) => ({
         language: state.language,
         currentUser: state.currentUser,

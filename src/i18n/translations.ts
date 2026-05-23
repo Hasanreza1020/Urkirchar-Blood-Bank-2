@@ -14,7 +14,7 @@ export const translations = {
     },
     hero: {
       headline: 'Every Drop Can Save a Life',
-      subtext: 'Find verified blood donors in Urkirchar instantly. Join our community of lifesavers.',
+      subtext: 'Find blood donors easily in Urkirchar. Be a donor and stand beside people in need.',
       findDonor: 'Find Donor',
       becomeDonor: 'Become a Donor',
     },
@@ -128,7 +128,7 @@ export const translations = {
     },
     footer: {
       about: 'About Us',
-      aboutText: 'The Urkirchar Blood Bank website is proudly powered by Urkirchar Shanti Sangha. Our mission is to ensure timely access to life-saving blood and prevent emergency shortages in our community.',
+      aboutText: 'The Urkirchar Blood Bank website was built by the youth of Urkirchar to help the community connect with blood donors more easily during emergencies. Our goal is to make the process simple and support people in times of need by connecting donors and recipients quickly.',
       quickLinks: 'Quick Links',
       contact: 'Contact',
       address: 'Urkirchar, Bangladesh',
@@ -177,7 +177,7 @@ export const translations = {
     },
     hero: {
       headline: 'প্রতিটি ফোঁটা একটি জীবন বাঁচাতে পারে',
-      subtext: 'উরকিরচরে তাৎক্ষণিকভাবে যাচাইকৃত রক্তদাতা খুঁজুন। জীবন রক্ষাকারীদের সম্প্রদায়ে যোগ দিন।',
+      subtext: 'উরকিরচরে সহজে রক্তদাতা খুঁজুন। রক্তদানে এগিয়ে আসুন, মানুষের পাশে থাকুন।',
       findDonor: 'রক্তদাতা খুঁজুন',
       becomeDonor: 'রক্তদাতা হিসেবে নিবন্ধন করুন',
     },
@@ -291,7 +291,7 @@ export const translations = {
     },
     footer: {
       about: 'আমাদের সম্পর্কে',
-      aboutText: 'উরকিরচর ব্লাড ব্যাংক ওয়েবসাইটটি গর্বের সাথে উরকিরচর শান্তি সংঘ দ্বারা পরিচালিত। আমাদের লক্ষ্য হলো জীবন রক্ষাকারী রক্তের সময়মতো প্রাপ্যতা নিশ্চিত করা।',
+      aboutText: 'উরকিরচর ব্লাড ব্যাংক ওয়েবসাইটটি উরকিরচরের তরুণদের উদ্যোগে তৈরি করা হয়েছে, যাতে প্রয়োজনের সময় মানুষ সহজে রক্তদাতা খুঁজে পেতে পারে। আমাদের লক্ষ্য হলো রক্তদাতা ও রক্তপ্রয়োজনীয় মানুষের মধ্যে দ্রুত যোগাযোগ তৈরি করা এবং এলাকার মানুষের পাশে থাকা।',
       quickLinks: 'দ্রুত লিংক',
       contact: 'যোগাযোগ',
       address: 'উরকিরচর, বাংলাদেশ',
