@@ -62,10 +62,11 @@ export function HomePage() {
   const availableDonors = donors.filter(d => d.available).length;
   const bloodGroups = [...new Set(donors.map(d => d.bloodGroup))].length;
 
-  // Lives saved grows over time (+2/day from launch) plus 1 per 10 registered donors
-  const LAUNCH_DATE = new Date('2026-01-01').getTime();
-  const daysSinceLaunch = Math.max(0, Math.floor((Date.now() - LAUNCH_DATE) / 86400000));
-  const livesSaved = 120 + daysSinceLaunch * 2 + Math.floor(totalDonors / 10);
+  // Lives saved: starts at 150 today and grows +2 each day
+  const LIVES_BASE = 150;
+  const LIVES_START_DATE = new Date('2026-05-23').getTime();
+  const daysSinceStart = Math.max(0, Math.floor((Date.now() - LIVES_START_DATE) / 86400000));
+  const livesSaved = LIVES_BASE + daysSinceStart * 2;
 
   const filtered = useMemo(() => {
     return donors.filter(d => {
@@ -359,8 +360,8 @@ export function HomePage() {
             </h2>
             <p className="text-gray-500 max-w-2xl mx-auto">
               {language === 'bn'
-                ? 'উরকিরচর শান্তি সংঘ দ্বারা পরিচালিত একটি কমিউনিটি উদ্যোগ।'
-                : 'A community initiative managed by Urkirchar Shanti Sangha.'}
+                ? 'উরকিরচরের তরুণদের একটি কমিউনিটি উদ্যোগ।'
+                : 'A community initiative by the youth of Urkirchar.'}
             </p>
           </div>
 
@@ -372,7 +373,7 @@ export function HomePage() {
                     জরুরি মুহূর্তে রক্ত খুঁজে পাওয়া উরকিরচরের মানুষের জন্য দীর্ঘদিনের একটি সংগ্রাম। প্রিয়জনের জন্য রক্তদাতা খুঁজতে গিয়ে পরিবারগুলোকে যে অসহায়তা ও আতঙ্কের মধ্য দিয়ে যেতে হয়, তা আমরা নিজের চোখে দেখেছি।
                   </p>
                   <p>
-                    সেই কথা মাথায় রেখেই <span className="font-semibold text-gray-900">উরকিরচর শান্তি সংঘ</span> এই প্ল্যাটফর্মটি তৈরি করেছে — যেখানে রক্তের গ্রুপ ও এলাকা অনুযায়ী কয়েক মিনিটেই উরকিরচরের যাচাইকৃত রক্তদাতাদের খুঁজে পাওয়া যায় এবং সরাসরি কল বা হোয়াটসঅ্যাপে যোগাযোগ করা যায়।
+                    সেই কথা মাথায় রেখেই <span className="font-semibold text-gray-900">উরকিরচরের একদল তরুণ</span> এই প্ল্যাটফর্মটি তৈরি করেছে — যেখানে রক্তের গ্রুপ ও এলাকা অনুযায়ী কয়েক মিনিটেই উরকিরচরের যাচাইকৃত রক্তদাতাদের খুঁজে পাওয়া যায় এবং সরাসরি কল বা হোয়াটসঅ্যাপে যোগাযোগ করা যায়।
                   </p>
                   <p>
                     আপনি যদি একজন রক্তদাতা হিসেবে নিবন্ধন করেন, তবে আপনি কারো সবচেয়ে কঠিন দিনে তাদের আশার আলো হয়ে উঠবেন — হয়তো অপরিচিত কারো জন্য, প্রতিবেশীর জন্য, কিংবা আপনার নিজের প্রিয়জনের জন্য।
@@ -384,7 +385,7 @@ export function HomePage() {
                     Finding blood in time of need has long been a struggle for the people of Urkirchar. We have watched families search desperately for donors during emergencies, often turning to strangers and social media in moments of fear and helplessness.
                   </p>
                   <p>
-                    Thinking about that, <span className="font-semibold text-gray-900">Urkirchar Shanti Sangha</span> built this platform — a single place where anyone can search verified donors by blood group and area in minutes, and reach them directly through call or WhatsApp without going through middlemen.
+                    Thinking about that, <span className="font-semibold text-gray-900">the youth of Urkirchar</span> built this platform — a single place where anyone can search verified donors by blood group and area in minutes, and reach them directly through call or WhatsApp without going through middlemen.
                   </p>
                   <p>
                     When you register as a donor, you become someone&apos;s hope on their darkest day — for a stranger, for a neighbor, perhaps even for someone you love. Every drop you give can save a life. Join the community and be the reason a family doesn&apos;t lose hope tonight.
@@ -416,7 +417,7 @@ export function HomePage() {
                 {
                   icon: HeartHandshake,
                   title: language === 'bn' ? 'কমিউনিটি দ্বারা পরিচালিত' : 'Run by the community',
-                  desc: language === 'bn' ? 'উরকিরচর শান্তি সংঘ দ্বারা পরিচালিত — সম্পূর্ণ বিনামূল্যে।' : 'Managed by Urkirchar Shanti Sangha — completely free to use.',
+                  desc: language === 'bn' ? 'উরকিরচরের তরুণদের দ্বারা পরিচালিত — সম্পূর্ণ বিনামূল্যে।' : 'Built and run by the youth of Urkirchar — completely free to use.',
                   color: 'bg-amber-50', iconColor: '#f59e0b',
                 },
               ].map((card, i) => (

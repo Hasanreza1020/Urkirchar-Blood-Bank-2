@@ -40,11 +40,8 @@ export function Navbar() {
               <Droplets className="w-5 h-5 text-white" />
             </div>
             <div className="min-w-0">
-              <div className="font-bold text-gray-900 text-sm leading-tight truncate">
+              <div className="font-bold text-gray-900 text-sm sm:text-base leading-tight truncate">
                 {language === 'bn' ? 'উরকিরচর ব্লাড ব্যাংক' : 'Urkirchar Blood Bank'}
-              </div>
-              <div className="text-[10px] sm:text-xs text-gray-400 leading-tight truncate">
-                {language === 'bn' ? 'প্রতিটি ফোঁটায় জীবন' : 'Every drop saves a life'}
               </div>
             </div>
           </Link>
