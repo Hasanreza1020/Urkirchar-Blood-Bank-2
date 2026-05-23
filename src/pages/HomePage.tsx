@@ -50,32 +50,46 @@ export function HomePage() {
   const { t, language } = useTranslation();
   const donors = useStore(state => state.donors);
 
+  // Draft filter inputs (edited freely)
   const [bloodGroup, setBloodGroup] = useState('');
   const [location, setLocation] = useState('');
   const [availableOnly, setAvailableOnly] = useState(false);
+  // Applied filters — only updated when the user presses Search
+  const [applied, setApplied] = useState({ bloodGroup: '', location: '', availableOnly: false });
   const [page, setPage] = useState(1);
 
   const totalDonors = donors.length;
   const availableDonors = donors.filter(d => d.available).length;
   const bloodGroups = [...new Set(donors.map(d => d.bloodGroup))].length;
 
+  // Lives saved grows over time (+2/day from launch) plus 1 per 10 registered donors
+  const LAUNCH_DATE = new Date('2026-01-01').getTime();
+  const daysSinceLaunch = Math.max(0, Math.floor((Date.now() - LAUNCH_DATE) / 86400000));
+  const livesSaved = 120 + daysSinceLaunch * 2 + Math.floor(totalDonors / 10);
+
   const filtered = useMemo(() => {
     return donors.filter(d => {
-      if (bloodGroup && d.bloodGroup !== bloodGroup) return false;
-      if (location && d.location !== location) return false;
-      if (availableOnly && !d.available) return false;
+      if (applied.bloodGroup && d.bloodGroup !== applied.bloodGroup) return false;
+      if (applied.location && d.location !== applied.location) return false;
+      if (applied.availableOnly && !d.available) return false;
       return true;
     });
-  }, [donors, bloodGroup, location, availableOnly]);
+  }, [donors, applied]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
   const safePage = Math.min(page, totalPages);
   const paginated = filtered.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE);
 
+  const handleSearch = () => {
+    setApplied({ bloodGroup, location, availableOnly });
+    setPage(1);
+  };
+
   const handleReset = () => {
     setBloodGroup('');
     setLocation('');
     setAvailableOnly(false);
+    setApplied({ bloodGroup: '', location: '', availableOnly: false });
     setPage(1);
   };
 
@@ -128,7 +142,7 @@ export function HomePage() {
               { label: t.stats.totalDonors, value: totalDonors, icon: Users, iconColor: '#dc2626' },
               { label: t.stats.availableDonors, value: availableDonors, icon: Heart, iconColor: '#22c55e' },
               { label: t.stats.bloodGroups, value: bloodGroups, icon: Droplets, iconColor: '#a855f7' },
-              { label: t.stats.livesSaved, value: 150, icon: HeartHandshake, iconColor: '#f59e0b' },
+              { label: t.stats.livesSaved, value: livesSaved, icon: HeartHandshake, iconColor: '#f59e0b' },
             ].map((stat, i) => (
               <div
                 key={i}
@@ -177,7 +191,7 @@ export function HomePage() {
                   <Droplets className="w-4 h-4 text-blood-500 shrink-0" />
                   <select
                     value={bloodGroup}
-                    onChange={e => { setBloodGroup(e.target.value); setPage(1); }}
+                    onChange={e => setBloodGroup(e.target.value)}
                     className="w-full bg-transparent text-sm text-gray-900 focus:outline-none"
                   >
                     <option value="">{t.search.allGroups}</option>
@@ -192,7 +206,7 @@ export function HomePage() {
                   <MapPin className="w-4 h-4 text-blood-500 shrink-0" />
                   <select
                     value={location}
-                    onChange={e => { setLocation(e.target.value); setPage(1); }}
+                    onChange={e => setLocation(e.target.value)}
                     className="w-full bg-transparent text-sm text-gray-900 focus:outline-none"
                   >
                     <option value="">{t.search.allLocations}</option>
@@ -211,7 +225,7 @@ export function HomePage() {
                     <input
                       type="checkbox"
                       checked={availableOnly}
-                      onChange={e => { setAvailableOnly(e.target.checked); setPage(1); }}
+                      onChange={e => setAvailableOnly(e.target.checked)}
                       className="sr-only"
                     />
                     <div className={`w-11 h-6 rounded-full transition-colors ${availableOnly ? 'bg-blood-600' : 'bg-gray-300'}`}>
@@ -222,13 +236,20 @@ export function HomePage() {
                 </label>
               </div>
 
-              <div className="flex items-end">
+              <div className="flex items-end gap-2">
+                <button
+                  onClick={handleSearch}
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blood-600 to-blood-500 hover:from-blood-700 hover:to-blood-600 rounded-xl transition-all shadow-sm"
+                >
+                  <Search className="w-4 h-4" />
+                  {t.search.search}
+                </button>
                 <button
                   onClick={handleReset}
-                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-600 hover:text-blood-600 bg-gray-50 hover:bg-red-50 border border-gray-200 hover:border-red-200 rounded-xl transition-colors"
+                  className="inline-flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium text-gray-600 hover:text-blood-600 bg-gray-50 hover:bg-red-50 border border-gray-200 hover:border-red-200 rounded-xl transition-colors"
+                  title={t.search.reset}
                 >
                   <X className="w-4 h-4" />
-                  {t.search.reset}
                 </button>
               </div>
             </div>
@@ -240,12 +261,17 @@ export function HomePage() {
               </div>
               <div className="flex flex-wrap gap-2">
                 {BLOOD_GROUPS.map(g => {
-                  const active = bloodGroup === g;
+                  const active = applied.bloodGroup === g;
                   const count = donors.filter(d => d.bloodGroup === g && d.available).length;
                   return (
                     <button
                       key={g}
-                      onClick={() => { setBloodGroup(active ? '' : g); setPage(1); }}
+                      onClick={() => {
+                        const next = active ? '' : g;
+                        setBloodGroup(next);
+                        setApplied(prev => ({ ...prev, bloodGroup: next }));
+                        setPage(1);
+                      }}
                       className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${
                         active
                           ? 'bg-blood-600 text-white shadow shadow-red-200'
@@ -365,17 +391,6 @@ export function HomePage() {
                   </p>
                 </>
               )}
-
-              <div className="pt-2">
-                <Link
-                  to="/register"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blood-600 to-blood-500 text-white font-semibold rounded-xl hover:from-blood-700 hover:to-blood-600 transition-all shadow-md text-sm"
-                >
-                  <UserPlus className="w-4 h-4" />
-                  {language === 'bn' ? 'রক্তদাতা হিসেবে নিবন্ধন করুন' : 'Register as a donor'}
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -418,6 +433,16 @@ export function HomePage() {
               ))}
             </div>
           </div>
+
+          {/* Full-width register CTA after the features */}
+          <Link
+            to="/register"
+            className="mt-8 w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-blood-600 to-blood-500 text-white font-bold rounded-xl hover:from-blood-700 hover:to-blood-600 transition-all shadow-md hover:shadow-lg"
+          >
+            <UserPlus className="w-5 h-5" />
+            {language === 'bn' ? 'রক্তদাতা হিসেবে নিবন্ধন করুন' : 'Register as a donor'}
+            <ArrowRight className="w-5 h-5" />
+          </Link>
         </div>
       </section>
 

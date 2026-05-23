@@ -6,8 +6,8 @@ export function Footer() {
   const { t, language } = useTranslation();
 
   const aboutText = language === 'bn'
-    ? 'উরকিরচর ব্লাড ব্যাংক ওয়েবসাইটটি গর্বের সাথে উরকিরচর শান্তি সংঘ দ্বারা পরিচালিত। আমাদের লক্ষ্য হলো জীবন রক্ষাকারী রক্তের সময়মতো প্রাপ্যতা নিশ্চিত করা এবং আমাদের সম্প্রদায়ে জরুরি রক্তের ঘাটতি রোধ করা। দাতা ও গ্রহীতাদের দক্ষতার সাথে সংযুক্ত করে, আমরা জীবন বাঁচাতে এবং উরকিরচরে সংহতির চেতনাকে শক্তিশালী করতে চাই।'
-    : 'The Urkirchar Blood Bank website is proudly powered by Urkirchar Shanti Sangha. Our mission is to ensure timely access to life-saving blood and prevent emergency shortages in our community. By connecting donors and recipients efficiently, we aim to save lives and strengthen the spirit of solidarity in Urkirchar.';
+    ? 'উরকিরচর ব্লাড ব্যাংক ওয়েবসাইটটি উরকিরচরের তরুণদের উদ্যোগে তৈরি করা হয়েছে, যাতে প্রয়োজনের সময় মানুষ সহজে রক্তদাতা খুঁজে পেতে পারে। আমাদের লক্ষ্য হলো রক্তদাতা ও রক্তপ্রয়োজনীয় মানুষের মধ্যে দ্রুত যোগাযোগ তৈরি করা এবং এলাকার মানুষের পাশে থাকা।'
+    : 'The Urkirchar Blood Bank website was built by the youth of Urkirchar to help the community connect with blood donors more easily during emergencies. Our goal is to make the process simple and support people in times of need by connecting donors and recipients quickly.';
 
   return (
     <footer className="bg-gray-900 text-gray-300">
@@ -28,10 +28,7 @@ export function Footer() {
                 </span>
               </div>
             </div>
-            <p className="text-xs text-gray-500 mb-4 font-medium">
-              {language === 'bn' ? 'পরিচালনায়: উরকিরচর শান্তি সংঘ' : 'Powered by Urkirchar Shanti Sangha'}
-            </p>
-            <p className="text-sm text-gray-400 leading-relaxed">{aboutText}</p>
+            <p className="text-sm text-gray-400 leading-relaxed mt-3">{aboutText}</p>
           </div>
 
           {/* Quick Links */}

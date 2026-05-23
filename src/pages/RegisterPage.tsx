@@ -26,8 +26,7 @@ export function RegisterPage() {
     if (!form.name.trim()) errs.name = 'Required';
     if (!form.bloodGroup) errs.bloodGroup = 'Required';
     if (!form.phone.trim()) errs.phone = 'Required';
-    if (!form.email.trim()) errs.email = 'Required';
-    else if (!/\S+@\S+\.\S+/.test(form.email)) errs.email = 'Invalid email';
+    if (form.email.trim() && !/\S+@\S+\.\S+/.test(form.email)) errs.email = 'Invalid email';
     if (!form.password.trim()) errs.password = 'Required';
     else if (form.password.length < 6) errs.password = 'Min 6 characters';
     if (!form.location) errs.location = 'Required';
@@ -64,11 +63,13 @@ export function RegisterPage() {
     if (!validate()) return;
 
     setLoading(true);
+    // Email is optional; fall back to a phone-derived address so auth still works
+    const email = form.email.trim() || `donor${form.phone.replace(/[^0-9]/g, '')}@urkirchar.local`;
     try {
       await registerUserAndDonor(
         {
           name: form.name,
-          email: form.email,
+          email,
           password: form.password,
         },
         {
@@ -199,7 +200,9 @@ export function RegisterPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t.register.email} *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                {t.register.email} <span className="text-gray-400 font-normal">({language === 'bn' ? 'ঐচ্ছিক' : 'optional'})</span>
+              </label>
               <input type="email" value={form.email} onChange={e => handleChange('email', e.target.value)} placeholder={t.register.emailPlaceholder} className={inputClass('email')} />
               {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
             </div>

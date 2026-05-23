@@ -44,7 +44,7 @@ export function Navbar() {
                 {language === 'bn' ? 'উরকিরচর ব্লাড ব্যাংক' : 'Urkirchar Blood Bank'}
               </div>
               <div className="text-[10px] sm:text-xs text-gray-400 leading-tight truncate">
-                {language === 'bn' ? 'পরিচালিত: উরকিরচর শান্তি সংঘ' : 'Powered by Urkirchar Shanti Shanga'}
+                {language === 'bn' ? 'প্রতিটি ফোঁটায় জীবন' : 'Every drop saves a life'}
               </div>
             </div>
           </Link>

@@ -13,9 +13,11 @@ export function SearchPage() {
   const donors = useStore(state => state.donors);
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [bloodGroup, setBloodGroup] = useState(searchParams.get('bloodGroup') || '');
+  const initialGroup = searchParams.get('bloodGroup') || '';
+  const [bloodGroup, setBloodGroup] = useState(initialGroup);
   const [location, setLocation] = useState('');
   const [availableOnly, setAvailableOnly] = useState(false);
+  const [applied, setApplied] = useState({ bloodGroup: initialGroup, location: '', availableOnly: false });
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -26,17 +28,18 @@ export function SearchPage() {
 
   const filtered = useMemo(() => {
     return donors.filter(d => {
-      if (bloodGroup && d.bloodGroup !== bloodGroup) return false;
-      if (location && d.location !== location) return false;
-      if (availableOnly && !d.available) return false;
+      if (applied.bloodGroup && d.bloodGroup !== applied.bloodGroup) return false;
+      if (applied.location && d.location !== applied.location) return false;
+      if (applied.availableOnly && !d.available) return false;
       return true;
     });
-  }, [donors, bloodGroup, location, availableOnly]);
+  }, [donors, applied]);
 
   const totalPages = Math.ceil(filtered.length / PER_PAGE);
   const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   const handleSearch = () => {
+    setApplied({ bloodGroup, location, availableOnly });
     setPage(1);
     const params = new URLSearchParams();
     if (bloodGroup) params.set('bloodGroup', bloodGroup);
@@ -47,6 +50,7 @@ export function SearchPage() {
     setBloodGroup('');
     setLocation('');
     setAvailableOnly(false);
+    setApplied({ bloodGroup: '', location: '', availableOnly: false });
     setPage(1);
     setSearchParams({});
   };
