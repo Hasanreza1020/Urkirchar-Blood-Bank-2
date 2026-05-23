@@ -62,8 +62,8 @@ export function HomePage() {
   const availableDonors = donors.filter(d => d.available).length;
   const bloodGroups = [...new Set(donors.map(d => d.bloodGroup))].length;
 
-  // Lives saved: starts at 150 today and grows +2 each day
-  const LIVES_BASE = 150;
+  // Lives saved: starts at 4 today and grows +2 each day
+  const LIVES_BASE = 4;
   const LIVES_START_DATE = new Date('2026-05-23').getTime();
   const daysSinceStart = Math.max(0, Math.floor((Date.now() - LIVES_START_DATE) / 86400000));
   const livesSaved = LIVES_BASE + daysSinceStart * 2;
