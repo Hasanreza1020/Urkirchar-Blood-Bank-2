@@ -3,8 +3,7 @@ import { Link } from 'react-router-dom';
 import { User, CreditCard as Edit3, Save, X, MapPin, Phone, Mail, Calendar, Droplets, Shield, CircleCheck as CheckCircle, Camera, Upload } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation';
 import { useStore, LOCATIONS } from '../store/supabaseStore';
-import { getDonorByUserId } from '../services/donorService';
-import { resizeImage } from '../utils/image';
+import { getDonorByUserId, uploadDonorPhoto } from '../services/donorService';
 import toast from 'react-hot-toast';
 
 export function ProfilePage() {
@@ -58,8 +57,8 @@ export function ProfilePage() {
       return;
     }
     try {
-      const compressed = await resizeImage(file);
-      setForm(p => ({ ...p, image: compressed }));
+      const url = await uploadDonorPhoto(file);
+      setForm(p => ({ ...p, image: url }));
     } catch {
       toast.error('Could not process image');
     }
