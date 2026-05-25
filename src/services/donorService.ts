@@ -1,15 +1,36 @@
 import { supabase } from '../lib/supabase';
 import type { Donor } from '../lib/supabase';
+import { resizeImage } from '../utils/image';
+
+const PHOTO_BUCKET = 'donor-photos';
+
+// Resize the file then upload it to Supabase Storage and return the public
+// URL. If the bucket/policies aren't set up yet (or upload fails), we fall
+// back to a small resized base64 data URL so registration never breaks.
+export async function uploadDonorPhoto(file: File): Promise<string> {
+  const resizedDataUrl = await resizeImage(file);
+  try {
+    const blob = await (await fetch(resizedDataUrl)).blob();
+    const path = `${crypto.randomUUID()}.jpg`;
+    const { error } = await supabase.storage
+      .from(PHOTO_BUCKET)
+      .upload(path, blob, { contentType: 'image/jpeg', upsert: true, cacheControl: '3600' });
+    if (error) throw error;
+    const { data } = supabase.storage.from(PHOTO_BUCKET).getPublicUrl(path);
+    return data.publicUrl;
+  } catch (e) {
+    console.warn('Storage upload unavailable, storing compressed inline image instead:', e);
+    return resizedDataUrl;
+  }
+}
 
 export async function fetchAllDonors(): Promise<Donor[]> {
   try {
-    // NOTE: the heavy base64 `image` column is intentionally excluded here.
-    // The donor list/grid shows initials avatars; full photos are loaded
-    // only on the individual profile page. This keeps the list payload
-    // tiny and the home page fast.
+    // `image` now holds a small Storage URL (or a compressed fallback),
+    // so it's cheap to include and lets the cards show photos.
     const { data, error } = await supabase
       .from('donors')
-      .select('id,user_id,name,email,phone,blood_group,location,last_donation,available,verified,created_at,updated_at')
+      .select('id,user_id,name,email,phone,blood_group,location,last_donation,available,verified,image,created_at,updated_at')
       .order('created_at', { ascending: false })
       .limit(500);
 

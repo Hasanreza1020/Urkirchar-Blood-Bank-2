@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { UserPlus, Droplets, Upload, X, Camera } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation';
 import { useStore, LOCATIONS } from '../store/supabaseStore';
-import { resizeImage } from '../utils/image';
+import { uploadDonorPhoto } from '../services/donorService';
 import toast from 'react-hot-toast';
 
 const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
@@ -44,10 +44,11 @@ export function RegisterPage() {
       return;
     }
 
+    setImagePreview('');
     try {
-      const compressed = await resizeImage(file);
-      setForm(prev => ({ ...prev, image: compressed }));
-      setImagePreview(compressed);
+      const url = await uploadDonorPhoto(file);
+      setForm(prev => ({ ...prev, image: url }));
+      setImagePreview(url);
     } catch {
       toast.error('Could not process image');
     }

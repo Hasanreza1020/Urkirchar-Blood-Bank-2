@@ -40,7 +40,7 @@ export function DonorCard({ donor }: DonorCardProps) {
         <div className="flex items-center gap-3 mb-4">
           <div className="relative shrink-0">
             {donor.image ? (
-              <img src={donor.image} alt={donor.name} className="w-12 h-12 rounded-xl object-cover" />
+              <img src={donor.image} alt={donor.name} loading="lazy" decoding="async" className="w-12 h-12 rounded-xl object-cover" />
             ) : (
               <div className={`w-12 h-12 rounded-xl ${bgColors[colorIndex]} flex items-center justify-center`}>
                 <span className="text-white font-bold text-base">{getInitials(donor.name)}</span>
