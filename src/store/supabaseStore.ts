@@ -58,7 +58,7 @@ function transformSupabaseDonor(d: SupabaseDonor): Donor {
     lastDonation: d.last_donation || 'N/A',
     available: d.available,
     verified: d.verified,
-    image: d.image,
+    image: d.image || '',
     createdAt: d.created_at.split('T')[0],
     userId: d.user_id || '',
   };

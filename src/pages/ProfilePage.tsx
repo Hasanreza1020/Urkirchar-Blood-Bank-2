@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { User, CreditCard as Edit3, Save, X, MapPin, Phone, Mail, Calendar, Droplets, Shield, CircleCheck as CheckCircle, Camera, Upload } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation';
 import { useStore, LOCATIONS } from '../store/supabaseStore';
+import { getDonorByUserId } from '../services/donorService';
 import { resizeImage } from '../utils/image';
 import toast from 'react-hot-toast';
 
@@ -16,10 +17,25 @@ export function ProfilePage() {
   const donor = donors.find(d => d.userId === currentUser?.id);
 
   const [form, setForm] = useState({ name: '', phone: '', location: '', lastDonation: '', image: '' });
+  // The donor list no longer carries the heavy photo; fetch the full
+  // photo for the logged-in user's own profile only.
+  const [photo, setPhoto] = useState('');
 
   useEffect(() => {
-    if (donor) setForm({ name: donor.name, phone: donor.phone, location: donor.location, lastDonation: donor.lastDonation, image: donor.image });
-  }, [donor]);
+    let active = true;
+    if (currentUser?.id) {
+      getDonorByUserId(currentUser.id).then(rec => {
+        if (active && rec) setPhoto(rec.image || '');
+      });
+    }
+    return () => { active = false; };
+  }, [currentUser?.id]);
+
+  useEffect(() => {
+    if (donor && !editing) {
+      setForm({ name: donor.name, phone: donor.phone, location: donor.location, lastDonation: donor.lastDonation, image: photo });
+    }
+  }, [donor, photo, editing]);
 
   if (!currentUser) {
     return (
@@ -55,6 +71,7 @@ export function ProfilePage() {
     setSaving(true);
     try {
       await updateDonor(donor.id, { name: form.name, phone: form.phone, location: form.location, lastDonation: form.lastDonation, image: form.image });
+      setPhoto(form.image);
       toast.success(t.profile.updated);
       setEditing(false);
     } catch (error) {
@@ -106,8 +123,8 @@ export function ProfilePage() {
           <div className="px-6 sm:px-8 -mt-14 mb-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4">
               <div className="relative group">
-                {(editing ? form.image : donor?.image) ? (
-                  <img src={editing ? form.image : donor?.image} alt={currentUser.name} className="w-28 h-28 rounded-2xl border-4 border-white shadow-xl object-cover" />
+                {(editing ? form.image : photo) ? (
+                  <img src={editing ? form.image : photo} alt={currentUser.name} className="w-28 h-28 rounded-2xl border-4 border-white shadow-xl object-cover" />
                 ) : (
                   <div className="w-28 h-28 rounded-2xl border-4 border-white shadow-xl bg-gradient-to-br from-blood-400 to-blood-600 flex items-center justify-center">
                     <span className="text-white text-3xl font-black">{getInitials(currentUser.name)}</span>
@@ -178,7 +195,7 @@ export function ProfilePage() {
                       <button onClick={handleSave} className="flex items-center gap-1.5 px-4 py-2.5 bg-blood-600 text-white text-sm font-semibold rounded-xl hover:bg-blood-700 transition-colors shadow-sm">
                         <Save className="w-4 h-4" /> {t.profile.saveChanges}
                       </button>
-                      <button onClick={() => { setEditing(false); if(donor) setForm({ name: donor.name, phone: donor.phone, location: donor.location, lastDonation: donor.lastDonation, image: donor.image }); }} className="flex items-center gap-1.5 px-4 py-2.5 bg-gray-50 text-gray-600 text-sm font-medium rounded-xl hover:bg-gray-100 transition-colors border border-gray-200">
+                      <button onClick={() => { setEditing(false); if(donor) setForm({ name: donor.name, phone: donor.phone, location: donor.location, lastDonation: donor.lastDonation, image: photo }); }} className="flex items-center gap-1.5 px-4 py-2.5 bg-gray-50 text-gray-600 text-sm font-medium rounded-xl hover:bg-gray-100 transition-colors border border-gray-200">
                         <X className="w-4 h-4" /> {t.profile.cancel}
                       </button>
                     </>
