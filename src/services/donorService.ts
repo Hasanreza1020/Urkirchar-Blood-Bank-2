@@ -3,11 +3,15 @@ import type { Donor } from '../lib/supabase';
 
 export async function fetchAllDonors(): Promise<Donor[]> {
   try {
+    // NOTE: the heavy base64 `image` column is intentionally excluded here.
+    // The donor list/grid shows initials avatars; full photos are loaded
+    // only on the individual profile page. This keeps the list payload
+    // tiny and the home page fast.
     const { data, error } = await supabase
       .from('donors')
-      .select('id,user_id,name,email,phone,blood_group,location,last_donation,available,verified,image,created_at,updated_at')
+      .select('id,user_id,name,email,phone,blood_group,location,last_donation,available,verified,created_at,updated_at')
       .order('created_at', { ascending: false })
-      .limit(300);
+      .limit(500);
 
     if (error) throw error;
 
