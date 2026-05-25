@@ -93,6 +93,7 @@ interface StoreState {
     image: string;
   }) => Promise<User>;
   donors: Donor[];
+  donorsLoading: boolean;
   loadDonors: () => Promise<void>;
   addDonor: (donor: {
     userId?: string;
@@ -182,13 +183,17 @@ export const useStore = create<StoreState>()(
       },
 
       donors: [],
+      donorsLoading: false,
 
       loadDonors: async () => {
+        set({ donorsLoading: true });
         try {
           const donors = await fetchAllDonors();
           set({ donors: donors.map(transformSupabaseDonor) });
         } catch (error) {
           console.error('Load donors failed:', error);
+        } finally {
+          set({ donorsLoading: false });
         }
       },
 
@@ -273,6 +278,9 @@ export const useStore = create<StoreState>()(
       partialize: (state) => ({
         language: state.language,
         currentUser: state.currentUser,
+        // Cache the donor list (without heavy images) so repeat visits
+        // paint instantly while the network refresh runs in the background.
+        donors: state.donors.map(d => ({ ...d, image: '' })),
       }),
     }
   )

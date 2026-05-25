@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { UserPlus, Droplets, Upload, X, Camera } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation';
 import { useStore, LOCATIONS } from '../store/supabaseStore';
+import { resizeImage } from '../utils/image';
 import toast from 'react-hot-toast';
 
 const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
@@ -34,22 +35,22 @@ export function RegisterPage() {
     return Object.keys(errs).length === 0;
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error('Image size must be less than 2MB');
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error('Image size must be less than 8MB');
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64 = reader.result as string;
-      setForm(prev => ({ ...prev, image: base64 }));
-      setImagePreview(base64);
-    };
-    reader.readAsDataURL(file);
+    try {
+      const compressed = await resizeImage(file);
+      setForm(prev => ({ ...prev, image: compressed }));
+      setImagePreview(compressed);
+    } catch {
+      toast.error('Could not process image');
+    }
   };
 
   const removeImage = () => {

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { User, CreditCard as Edit3, Save, X, MapPin, Phone, Mail, Calendar, Droplets, Shield, CircleCheck as CheckCircle, Camera, Upload } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation';
 import { useStore, LOCATIONS } from '../store/supabaseStore';
+import { resizeImage } from '../utils/image';
 import toast from 'react-hot-toast';
 
 export function ProfilePage() {
@@ -33,19 +34,19 @@ export function ProfilePage() {
     );
   }
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error('Image must be less than 2MB');
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error('Image must be less than 8MB');
       return;
     }
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64 = reader.result as string;
-      setForm(p => ({ ...p, image: base64 }));
-    };
-    reader.readAsDataURL(file);
+    try {
+      const compressed = await resizeImage(file);
+      setForm(p => ({ ...p, image: compressed }));
+    } catch {
+      toast.error('Could not process image');
+    }
   };
 
   const handleSave = async () => {

@@ -5,12 +5,13 @@ export async function fetchAllDonors(): Promise<Donor[]> {
   try {
     const { data, error } = await supabase
       .from('donors')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .select('id,user_id,name,email,phone,blood_group,location,last_donation,available,verified,image,created_at,updated_at')
+      .order('created_at', { ascending: false })
+      .limit(300);
 
     if (error) throw error;
 
-    return data || [];
+    return (data || []) as Donor[];
   } catch (error) {
     console.error('Fetch donors error:', error);
     return [];

@@ -49,6 +49,7 @@ function BloodDropIcon({ className }: { className?: string }) {
 export function HomePage() {
   const { t, language } = useTranslation();
   const donors = useStore(state => state.donors);
+  const donorsLoading = useStore(state => state.donorsLoading);
 
   // Draft filter inputs (edited freely)
   const [bloodGroup, setBloodGroup] = useState('');
@@ -291,7 +292,24 @@ export function HomePage() {
           </div>
 
           {/* Results */}
-          {paginated.length > 0 ? (
+          {donorsLoading && donors.length === 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="bg-white rounded-2xl border border-gray-100 p-5">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 rounded-xl skeleton" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 w-2/3 rounded skeleton" />
+                      <div className="h-3 w-1/3 rounded skeleton" />
+                    </div>
+                  </div>
+                  <div className="h-12 w-32 mx-auto rounded-full skeleton mb-4" />
+                  <div className="h-10 rounded-xl skeleton mb-2.5" />
+                  <div className="h-10 rounded-xl skeleton" />
+                </div>
+              ))}
+            </div>
+          ) : paginated.length > 0 ? (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
                 {paginated.map((donor, i) => (
